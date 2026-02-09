@@ -10,9 +10,9 @@ func TestConvertBrightness(t *testing.T) {
 		expected []byte
 		errMsg   string
 	}{
-		{1, extendByteSlice([]byte{0x11, 0xff, 0x04, 0x4c, 0x00, 0x14}), ""},
-		{50, extendByteSlice([]byte{0x11, 0xff, 0x04, 0x4c, 0x00, 0x85}), ""},
-		{100, extendByteSlice([]byte{0x11, 0xff, 0x04, 0x4c, 0x00, 0xfa}), ""},
+		{1, extendByteSlice([]byte{0x11, 0xff, 0x06, 0x4c, 0x00, 0x14}), ""},
+		{50, extendByteSlice([]byte{0x11, 0xff, 0x06, 0x4c, 0x00, 0x85}), ""},
+		{100, extendByteSlice([]byte{0x11, 0xff, 0x06, 0x4c, 0x00, 0xfa}), ""},
 		{0, nil, "percentage must be greater than 1, was 0"},
 		{101, nil, "percentage must be less than 100, was 101"},
 	}
@@ -60,9 +60,9 @@ func TestConvertTemperature(t *testing.T) {
 		expected []byte
 		errMsg   string
 	}{
-		{2700, extendByteSlice([]byte{0x11, 0xff, 0x04, 0x9c, 0x0a, 0x8c}), ""},
-		{4000, extendByteSlice([]byte{0x11, 0xff, 0x04, 0x9c, 0x0f, 0xa0}), ""},
-		{6500, extendByteSlice([]byte{0x11, 0xff, 0x04, 0x9c, 0x19, 0x64}), ""},
+		{2700, extendByteSlice([]byte{0x11, 0xff, 0x06, 0x9c, 0x0a, 0x8c}), ""},
+		{4000, extendByteSlice([]byte{0x11, 0xff, 0x06, 0x9c, 0x0f, 0xa0}), ""},
+		{6500, extendByteSlice([]byte{0x11, 0xff, 0x06, 0x9c, 0x19, 0x64}), ""},
 		{2699, nil, "temperature must be greater than 2700, was 2699"},
 		{6501, nil, "temperature must be less than 6500, was 6501"},
 	}
@@ -101,6 +101,38 @@ func TestConvertTemperature(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func TestConvertBrightnessTarget(t *testing.T) {
+	// Front light should use FID 0x06
+	result, err := ConvertBrightnessTarget(FrontLight, 50)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result[2] != 0x06 {
+		t.Errorf("Expected FID 0x06 for FrontLight, got 0x%02x", result[2])
+	}
+
+	// Back light should use FID 0x0a
+	result, err = ConvertBrightnessTarget(BackLight, 50)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result[2] != 0x0a {
+		t.Errorf("Expected FID 0x0a for BackLight, got 0x%02x", result[2])
+	}
+}
+
+func TestConvertLightsOnTarget(t *testing.T) {
+	front := ConvertLightsOnTarget(FrontLight)
+	if front[2] != 0x06 || front[4] != 0x01 {
+		t.Errorf("Front ON incorrect: % x", front[:6])
+	}
+
+	back := ConvertLightsOnTarget(BackLight)
+	if back[2] != 0x0a || back[4] != 0x01 {
+		t.Errorf("Back ON incorrect: % x", back[:6])
 	}
 }
 

@@ -13,10 +13,23 @@ import (
 	"github.com/sstallion/go-hid"
 )
 
+// Settings for the existing "Set Brightness & Temperature" action
 type Settings struct {
 	Temperature uint16 `json:"temperature,string"`
 	Brightness  uint8  `json:"brightness,string"`
 }
+
+// CycleSettings stores a list of preset values and the current index
+type CycleSettings struct {
+	Presets []string `json:"presets"`
+	Index   int      `json:"cycleIndex"`
+}
+
+const (
+	VID       = 0x046d
+	PID       = 0xc903
+	UsagePage = 0xff43
+)
 
 func main() {
 	exitCode := 0
@@ -35,7 +48,7 @@ func main() {
 	defer func(f *os.File) {
 		err := f.Close()
 		if err != nil {
-			log.Printf("unable to close file “%s”: %v\n", fileName, err)
+			log.Printf("unable to close file \u201c%s\u201d: %v\n", fileName, err)
 		}
 	}(f)
 
@@ -65,9 +78,206 @@ func run(ctx context.Context) error {
 func setup(client *streamdeck.Client) {
 	settings := make(map[string]*Settings)
 
+	// Existing actions
 	setupSetLightsAction(client, settings)
 	setupTurnOffLightsAction(client)
+
+	// New Litra Beam LX actions
+	setupFrontPowerAction(client)
+	setupBackPowerAction(client)
+	setupFrontTempCycleAction(client)
+	setupFrontBrightnessCycleAction(client)
+	setupBackBrightnessCycleAction(client)
 }
+
+// --- Front Power On/Off ---
+func setupFrontPowerAction(client *streamdeck.Client) {
+	action := client.Action("ca.michaelabon.logitech-litra-lights.front.power")
+
+	action.RegisterHandler(
+		streamdeck.KeyDown,
+		func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+			log.Println("Front Power toggle")
+			// Toggle: try turning on. If already on, turn off.
+			err := writeToLights(func(deviceInfo *hid.DeviceInfo) error {
+				d, err := hid.OpenPath(deviceInfo.Path)
+				if err != nil {
+					return err
+				}
+				defer d.Close()
+
+				// Send ON command (if already on, sending ON again is harmless)
+				byteSequence := logitech.ConvertLightsOnTarget(logitech.FrontLight)
+				_, err = d.Write(byteSequence)
+				return err
+			})
+			if err != nil {
+				log.Println("Error toggling front power:", err)
+				return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
+			}
+			return nil
+		},
+	)
+}
+
+// --- Back Power On/Off ---
+func setupBackPowerAction(client *streamdeck.Client) {
+	action := client.Action("ca.michaelabon.logitech-litra-lights.back.power")
+
+	action.RegisterHandler(
+		streamdeck.KeyDown,
+		func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+			log.Println("Back Power toggle")
+			err := writeToLights(func(deviceInfo *hid.DeviceInfo) error {
+				d, err := hid.OpenPath(deviceInfo.Path)
+				if err != nil {
+					return err
+				}
+				defer d.Close()
+
+				byteSequence := logitech.ConvertLightsOnTarget(logitech.BackLight)
+				_, err = d.Write(byteSequence)
+				return err
+			})
+			if err != nil {
+				log.Println("Error toggling back power:", err)
+				return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
+			}
+			return nil
+		},
+	)
+}
+
+// --- Front Temperature Cycle ---
+func setupFrontTempCycleAction(client *streamdeck.Client) {
+	action := client.Action("ca.michaelabon.logitech-litra-lights.front.temperature")
+	cycleIndexes := make(map[string]int)
+
+	defaultTemps := []uint16{2700, 3200, 4000, 5000, 6500}
+
+	action.RegisterHandler(
+		streamdeck.KeyDown,
+		func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+			idx := cycleIndexes[event.Context]
+			temp := defaultTemps[idx%len(defaultTemps)]
+			cycleIndexes[event.Context] = (idx + 1) % len(defaultTemps)
+
+			log.Printf("Front Temp Cycle: %dK\n", temp)
+
+			err := writeToLights(func(deviceInfo *hid.DeviceInfo) error {
+				d, err := hid.OpenPath(deviceInfo.Path)
+				if err != nil {
+					return err
+				}
+				defer d.Close()
+
+				// Turn on first
+				onBytes := logitech.ConvertLightsOnTarget(logitech.FrontLight)
+				if _, err := d.Write(onBytes); err != nil {
+					return err
+				}
+
+				tempBytes, err := logitech.ConvertTemperatureTarget(logitech.FrontLight, temp)
+				if err != nil {
+					return err
+				}
+				_, err = d.Write(tempBytes)
+				return err
+			})
+
+			if err != nil {
+				log.Println("Error setting front temp:", err)
+				return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
+			}
+
+			return client.SetTitle(ctx, strconv.Itoa(int(temp))+"K", streamdeck.HardwareAndSoftware)
+		},
+	)
+}
+
+// --- Front Brightness Cycle ---
+func setupFrontBrightnessCycleAction(client *streamdeck.Client) {
+	action := client.Action("ca.michaelabon.logitech-litra-lights.front.brightness")
+	cycleIndexes := make(map[string]int)
+
+	defaultBrightness := []uint8{20, 40, 60, 80, 100}
+
+	action.RegisterHandler(
+		streamdeck.KeyDown,
+		func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+			idx := cycleIndexes[event.Context]
+			brightness := defaultBrightness[idx%len(defaultBrightness)]
+			cycleIndexes[event.Context] = (idx + 1) % len(defaultBrightness)
+
+			log.Printf("Front Brightness Cycle: %d%%\n", brightness)
+
+			err := writeToLights(func(deviceInfo *hid.DeviceInfo) error {
+				d, err := hid.OpenPath(deviceInfo.Path)
+				if err != nil {
+					return err
+				}
+				defer d.Close()
+
+				brightBytes, err := logitech.ConvertBrightnessTarget(logitech.FrontLight, brightness)
+				if err != nil {
+					return err
+				}
+				_, err = d.Write(brightBytes)
+				return err
+			})
+
+			if err != nil {
+				log.Println("Error setting front brightness:", err)
+				return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
+			}
+
+			return client.SetTitle(ctx, strconv.Itoa(int(brightness))+"%", streamdeck.HardwareAndSoftware)
+		},
+	)
+}
+
+// --- Back Brightness Cycle ---
+func setupBackBrightnessCycleAction(client *streamdeck.Client) {
+	action := client.Action("ca.michaelabon.logitech-litra-lights.back.brightness")
+	cycleIndexes := make(map[string]int)
+
+	defaultBrightness := []uint8{20, 40, 60, 80, 100}
+
+	action.RegisterHandler(
+		streamdeck.KeyDown,
+		func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+			idx := cycleIndexes[event.Context]
+			brightness := defaultBrightness[idx%len(defaultBrightness)]
+			cycleIndexes[event.Context] = (idx + 1) % len(defaultBrightness)
+
+			log.Printf("Back Brightness Cycle: %d%%\n", brightness)
+
+			err := writeToLights(func(deviceInfo *hid.DeviceInfo) error {
+				d, err := hid.OpenPath(deviceInfo.Path)
+				if err != nil {
+					return err
+				}
+				defer d.Close()
+
+				brightBytes, err := logitech.ConvertBrightnessTarget(logitech.BackLight, brightness)
+				if err != nil {
+					return err
+				}
+				_, err = d.Write(brightBytes)
+				return err
+			})
+
+			if err != nil {
+				log.Println("Error setting back brightness:", err)
+				return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
+			}
+
+			return client.SetTitle(ctx, strconv.Itoa(int(brightness))+"%", streamdeck.HardwareAndSoftware)
+		},
+	)
+}
+
+// --- Legacy actions ---
 
 func setupTurnOffLightsAction(client *streamdeck.Client) {
 	turnOffLightsAction := client.Action("ca.michaelabon.logitech-litra-lights.off")
@@ -235,13 +445,9 @@ func handleSetLights(
 	return client.SetTitle(ctx, strconv.Itoa(int(s.Temperature)), streamdeck.HardwareAndSoftware)
 }
 
-const (
-	VID = 0x046d
-	PID = 0xc900
-)
-
 // writeToLights opens a connection to each light attached to the computer
 // and then invokes theFunc for each light.
+// Updated to use UsagePage filter for correct HID interface on Litra Beam LX.
 func writeToLights(theFunc hid.EnumFunc) error {
 	var err error
 
@@ -256,7 +462,13 @@ func writeToLights(theFunc hid.EnumFunc) error {
 		}
 	}()
 
-	err = hid.Enumerate(VID, PID, theFunc)
+	err = hid.Enumerate(VID, PID, func(deviceInfo *hid.DeviceInfo) error {
+		// Filter by UsagePage to ensure we hit the correct HID interface
+		if deviceInfo.UsagePage == UsagePage {
+			return theFunc(deviceInfo)
+		}
+		return nil
+	})
 	if err != nil {
 		return err
 	}
@@ -266,12 +478,9 @@ func writeToLights(theFunc hid.EnumFunc) error {
 
 func sendBrightnessAndTemperature(settings Settings) hid.EnumFunc {
 	return func(deviceInfo *hid.DeviceInfo) error {
-		var err error
-
-		d, err := hid.Open(VID, PID, deviceInfo.SerialNbr)
+		d, err := hid.OpenPath(deviceInfo.Path)
 		if err != nil {
 			log.Println("Unable to open", err)
-
 			return err
 		}
 		defer func(d *hid.Device) {
@@ -284,30 +493,25 @@ func sendBrightnessAndTemperature(settings Settings) hid.EnumFunc {
 		byteSequence := logitech.ConvertLightsOn()
 		if _, err := d.Write(byteSequence); err != nil {
 			log.Println(err)
-
 			return err
 		}
 
 		byteSequence, err = logitech.ConvertBrightness(settings.Brightness)
 		if err != nil {
 			log.Println(err)
-
 			return err
 		}
 		if _, err := d.Write(byteSequence); err != nil {
 			log.Println("Unable to write bytes with set brightness", err)
-
 			return err
 		}
 		byteSequence, err = logitech.ConvertTemperature(settings.Temperature)
 		if err != nil {
 			log.Println(err)
-
 			return err
 		}
 		if _, err := d.Write(byteSequence); err != nil {
 			log.Println("Unable to write bytes with set temperature", err)
-
 			return err
 		}
 
@@ -317,12 +521,9 @@ func sendBrightnessAndTemperature(settings Settings) hid.EnumFunc {
 
 func sendTurnOffLights() hid.EnumFunc {
 	return func(deviceInfo *hid.DeviceInfo) error {
-		var err error
-
-		d, err := hid.Open(VID, PID, deviceInfo.SerialNbr)
+		d, err := hid.OpenPath(deviceInfo.Path)
 		if err != nil {
 			log.Println("unable to open", err)
-
 			return err
 		}
 		defer func(d *hid.Device) {
@@ -332,10 +533,16 @@ func sendTurnOffLights() hid.EnumFunc {
 			}
 		}(d)
 
-		byteSequence := logitech.ConvertLightsOff()
+		// Turn off both lights
+		byteSequence := logitech.ConvertLightsOffTarget(logitech.FrontLight)
 		if _, err := d.Write(byteSequence); err != nil {
-			log.Println("unable to write bytes with lights off", err)
+			log.Println("unable to write bytes with front lights off", err)
+			return err
+		}
 
+		byteSequence = logitech.ConvertLightsOffTarget(logitech.BackLight)
+		if _, err := d.Write(byteSequence); err != nil {
+			log.Println("unable to write bytes with back lights off", err)
 			return err
 		}
 

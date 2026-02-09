@@ -43,6 +43,12 @@ build: setup-hidapi
     # Fix macOS binary to reference the dylib relatively
     install_name_tool -change libhidapi.dylib @executable_path/libhidapi.dylib {{ PLUGIN }}/{{ TARGET }}_arm64
 
+# Generic/Windows build
+[windows]
+build: setup-hidapi
+    $env:CGO_ENABLED="1"; $env:GOOS="windows"; $env:GOARCH="amd64"; $env:CC="x86_64-w64-mingw32-gcc"; $env:CGO_LDFLAGS="-static-libgcc -L{{ justfile_directory() }}/{{ HIDAPI_DIR }}/windows -lhidapi"; {{ GO }} build -C go {{ GOFLAGS }} -o ../{{ PLUGIN }}/{{ TARGET }}.exe .
+    cp {{ HIDAPI_DIR }}/windows/hidapi.dll {{ PLUGIN }}/
+
 # WSL support
 [linux]
 build: setup-hidapi
@@ -61,21 +67,25 @@ build: setup-hidapi
     # Create dummy macOS file
     touch {{ PLUGIN }}/{{ TARGET }} # Stream Deck complains about a missing Mac binary while on Windows. (Why??)
 
-# Setup HIDAPI library directory with required files
+[windows]
+setup-hidapi:
+    if (!(Test-Path "{{ HIDAPI_DIR }}/windows")) { New-Item -ItemType Directory -Force -Path "{{ HIDAPI_DIR }}/windows" }
+    if (!(Test-Path "{{ HIDAPI_DIR }}/macos")) { New-Item -ItemType Directory -Force -Path "{{ HIDAPI_DIR }}/macos" }
+    if (!(Test-Path "{{ HIDAPI_DIR }}/windows/hidapi.dll")) { \
+      Invoke-WebRequest -Uri "https://github.com/libusb/hidapi/releases/download/hidapi-0.14.0/hidapi-win.zip" -OutFile "{{ HIDAPI_DIR }}/hidapi-win.zip"; \
+      Expand-Archive -Path "{{ HIDAPI_DIR }}/hidapi-win.zip" -DestinationPath "{{ HIDAPI_DIR }}/" -Force; \
+      Copy-Item "{{ HIDAPI_DIR }}/x64/hidapi.dll" -Destination "{{ HIDAPI_DIR }}/windows/hidapi.dll" -Force; \
+      Remove-Item "{{ HIDAPI_DIR }}/hidapi-win.zip" -Force; \
+      Remove-Item "{{ HIDAPI_DIR }}/x64" -Recurse -Force; \
+    }
+
+[macos, linux]
 setup-hidapi:
     mkdir -p {{ HIDAPI_DIR }}/windows {{ HIDAPI_DIR }}/macos
-
-    # Download and extract Windows hidapi.dll (x64 version)
     if [ ! -f {{ HIDAPI_DIR }}/windows/hidapi.dll ]; then \
       curl -L https://github.com/libusb/hidapi/releases/download/hidapi-0.14.0/hidapi-win.zip -o {{ HIDAPI_DIR }}/hidapi-win.zip && \
       unzip -j {{ HIDAPI_DIR }}/hidapi-win.zip 'x64/hidapi.dll' -d {{ HIDAPI_DIR }}/windows && \
       rm -f {{ HIDAPI_DIR }}/hidapi-win.zip; \
-    fi
-
-    # For macOS, install hidapi via homebrew and copy the dylib
-    if [ ! -f {{ HIDAPI_DIR }}/macos/libhidapi.dylib ]; then \
-      brew list hidapi || brew install hidapi && \
-      cp $(brew --prefix hidapi)/lib/libhidapi.dylib {{ HIDAPI_DIR }}/macos/; \
     fi
 
 clean:

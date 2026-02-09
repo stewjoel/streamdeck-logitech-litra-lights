@@ -17,7 +17,7 @@
 		},
 		{
 			"Icon": "icons/turnOffLightsAction",
-			"Name": "Turn Off Litra Lights",
+			"Name": "Turn Off All Lights",
 			"States": [
 				{
 					"Image": "icons/turnOffLightsAction",
@@ -27,8 +27,83 @@
 				}
 			],
 			"SupportedInMultiActions": true,
-			"Tooltip": "Turn off your lights",
+			"Tooltip": "Turn off both front and back lights",
 			"UUID": "ca.michaelabon.logitech-litra-lights.off"
+		},
+		{
+			"Icon": "icons/setLightsAction",
+			"Name": "Front Light Power",
+			"States": [
+				{
+					"Image": "icons/setLightsAction",
+					"TitleAlignment": "middle",
+					"Title": "Front",
+					"FontSize": 18
+				}
+			],
+			"SupportedInMultiActions": true,
+			"Tooltip": "Turn the front light on",
+			"UUID": "ca.michaelabon.logitech-litra-lights.front.power"
+		},
+		{
+			"Icon": "icons/turnOffLightsAction",
+			"Name": "Back Light Power",
+			"States": [
+				{
+					"Image": "icons/turnOffLightsAction",
+					"TitleAlignment": "middle",
+					"Title": "Back",
+					"FontSize": 18
+				}
+			],
+			"SupportedInMultiActions": true,
+			"Tooltip": "Turn the back light on",
+			"UUID": "ca.michaelabon.logitech-litra-lights.back.power"
+		},
+		{
+			"Icon": "icons/setLightsAction",
+			"Name": "Front Temp Cycle",
+			"States": [
+				{
+					"Image": "icons/setLightsAction",
+					"TitleAlignment": "middle",
+					"Title": "Temp",
+					"FontSize": 18
+				}
+			],
+			"SupportedInMultiActions": true,
+			"Tooltip": "Cycle front light color temperature (2700K-6500K)",
+			"UUID": "ca.michaelabon.logitech-litra-lights.front.temperature"
+		},
+		{
+			"Icon": "icons/setLightsAction",
+			"Name": "Front Brightness Cycle",
+			"States": [
+				{
+					"Image": "icons/setLightsAction",
+					"TitleAlignment": "middle",
+					"Title": "Bright",
+					"FontSize": 18
+				}
+			],
+			"SupportedInMultiActions": true,
+			"Tooltip": "Cycle front light brightness (20%-100%)",
+			"UUID": "ca.michaelabon.logitech-litra-lights.front.brightness"
+		},
+		{
+			"Icon": "icons/turnOffLightsAction",
+			"Name": "Back Brightness Cycle",
+			"States": [
+				{
+					"Image": "icons/turnOffLightsAction",
+					"TitleAlignment": "middle",
+					"Title": "Bright",
+					"FontSize": 18
+				}
+			],
+			"SupportedInMultiActions": true,
+			"Tooltip": "Cycle back light brightness (20%-100%)",
+			"UUID": "ca.michaelabon.logitech-litra-lights.back.brightness"
 		}
 	],
 	"Author": "Michael Abon",
@@ -36,7 +111,7 @@
 	"CategoryIcon": "icons/categoryIcon",
 	"CodePathMac": "build/streamdeck-logitech-litra-lights_arm64",
 	"CodePath": "build/streamdeck-logitech-litra-lights.exe",
-	"Description": "Control your Logitech Litra Glow lights directly from the Stream Deck.",
+	"Description": "Control your Logitech Litra Beam LX lights directly from the Stream Deck.",
 	"Icon": "icons/pluginIcon",
 	"Name": "Logitech Litra",
 	"OS": [
@@ -56,5 +131,5 @@
 	},
 	"URL": "https://github.com/michaelabon/streamdeck-logitech-litra-lights",
 	"UUID": "ca.michaelabon.logitech-litra-lights",
-	"Version": "1.0.6.0"
+	"Version": "2.0.0.0"
 }
