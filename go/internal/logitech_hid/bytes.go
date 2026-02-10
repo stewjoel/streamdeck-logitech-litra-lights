@@ -181,6 +181,21 @@ func ConvertColorTarget(target LightTarget, r, g, b uint8) ([][]byte, error) {
 	return ConvertBackColorAllZones(r, g, b), nil
 }
 
+// ConvertBackColorGradient generates commands to set a gradient across all 7 zones,
+// interpolating from color1 (r1,g1,b1) to color2 (r2,g2,b2).
+func ConvertBackColorGradient(r1, g1, b1, r2, g2, b2 uint8) [][]byte {
+	commands := make([][]byte, BackLightZoneCount+1)
+	for i := uint8(0); i < BackLightZoneCount; i++ {
+		t := float64(i) / float64(BackLightZoneCount-1) // 0.0 to 1.0
+		r := uint8(float64(r1)*(1-t) + float64(r2)*t)
+		g := uint8(float64(g1)*(1-t) + float64(g2)*t)
+		b := uint8(float64(b1)*(1-t) + float64(b2)*t)
+		commands[i] = ConvertBackColorZone(i+1, r, g, b)
+	}
+	commands[BackLightZoneCount] = ConvertBackColorCommit()
+	return commands
+}
+
 // --- Internal helpers ---
 
 const (

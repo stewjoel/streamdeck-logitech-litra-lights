@@ -151,7 +151,8 @@ func setupBackColorPickerAction(client *streamdeck.Client) {
 		}
 
 		if event.Event == streamdeck.KeyDown {
-			log.Printf("Back Color Picker: %d, %d, %d\n", s.Red, s.Green, s.Blue)
+			r, g, b := s.GetRGB()
+			log.Printf("Back Color Picker: %d, %d, %d (mode=%s)\n", r, g, b, s.Mode)
 
 			err := writeToLights(func(deviceInfo *hid.DeviceInfo) error {
 				d, err := hid.OpenPath(deviceInfo.Path)
@@ -166,11 +167,15 @@ func setupBackColorPickerAction(client *streamdeck.Client) {
 					return err
 				}
 
-				colorCmds, err := logitech.ConvertColorTarget(logitech.BackLight, s.Red, s.Green, s.Blue)
-				if err != nil {
-					return err
+				var commands [][]byte
+				if s.Mode == "gradient" {
+					r2, g2, b2 := s.GetRGB2()
+					commands = logitech.ConvertBackColorGradient(r, g, b, r2, g2, b2)
+				} else {
+					commands, _ = logitech.ConvertColorTarget(logitech.BackLight, r, g, b)
 				}
-				for _, cmd := range colorCmds {
+
+				for _, cmd := range commands {
 					if _, err := d.Write(cmd); err != nil {
 						return err
 					}

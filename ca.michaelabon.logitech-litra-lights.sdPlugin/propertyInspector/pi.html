@@ -48,17 +48,37 @@
 
     <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.back.colorpicker">
         <form id="property-inspector">
-            <div class="sdpi-item" id="red">
-                <div class="sdpi-item-label">Red</div>
-                <input class="sdpi-item-value" type="number" min="0" max="255" name="red" value="255">
+            <div class="sdpi-item" id="mode-select">
+                <div class="sdpi-item-label">Mode</div>
+                <div class="sdpi-item-value">
+                    <select name="mode" id="colorMode">
+                        <option value="solid">Solid Color</option>
+                        <option value="gradient">Gradient</option>
+                    </select>
+                </div>
             </div>
-            <div class="sdpi-item" id="green">
-                <div class="sdpi-item-label">Green</div>
-                <input class="sdpi-item-value" type="number" min="0" max="255" name="green" value="255">
+            <div class="sdpi-item" id="color-primary" type="color">
+                <div class="sdpi-item-label">Color</div>
+                <div class="sdpi-item-value" style="display:flex;align-items:center;gap:8px;">
+                    <input type="color" name="color" value="#ff0000" id="colorInput1"
+                        style="width:40px;height:26px;padding:0;border:1px solid #555;border-radius:3px;cursor:pointer;">
+                    <span id="colorHex1" style="font-family:monospace;color:#d8d8d8;font-size:10px;">#ff0000</span>
+                </div>
             </div>
-            <div class="sdpi-item" id="blue">
-                <div class="sdpi-item-label">Blue</div>
-                <input class="sdpi-item-value" type="number" min="0" max="255" name="blue" value="255">
+            <div class="sdpi-item" id="color-secondary" type="color" style="display:none;">
+                <div class="sdpi-item-label">Color 2</div>
+                <div class="sdpi-item-value" style="display:flex;align-items:center;gap:8px;">
+                    <input type="color" name="color2" value="#0000ff" id="colorInput2"
+                        style="width:40px;height:26px;padding:0;border:1px solid #555;border-radius:3px;cursor:pointer;">
+                    <span id="colorHex2" style="font-family:monospace;color:#d8d8d8;font-size:10px;">#0000ff</span>
+                </div>
+            </div>
+            <div class="sdpi-item" id="gradient-preview-container" style="display:none;">
+                <div class="sdpi-item-label">Preview</div>
+                <div class="sdpi-item-value">
+                    <div id="gradientPreview"
+                        style="height:20px;border-radius:4px;border:1px solid #555;margin-right:14px;"></div>
+                </div>
             </div>
         </form>
     </div>
