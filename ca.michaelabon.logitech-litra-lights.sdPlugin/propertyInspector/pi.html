@@ -2,12 +2,12 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8"/>
+    <meta charset="utf-8" />
     <meta name=viewport
-          content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover">
+        content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover">
     <meta name=apple-mobile-web-app-capable content=yes>
     <meta name=apple-mobile-web-app-status-bar-style content=black>
-    <link rel="stylesheet" href="./pi.css"/>
+    <link rel="stylesheet" href="./pi.css" />
     <style>
         input[type="range"] {
             color: deeppink;
@@ -24,30 +24,48 @@
 </head>
 
 <body>
-<div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.set">
-    <form id="property-inspector">
-        <div type="range" class="sdpi-item" id="temperature">
-            <div class="sdpi-item-label">Temperature</div>
-            <div class="sdpi-item-value">
-                <span class="clickable" value="2700">2700</span>
-                <input data-suffix="K" type="range" min="2700" max="6500" step="100" name="temperature" value="3200">
-                <span class="clickable" value="6500">6500</span>
+    <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.set">
+        <form id="property-inspector">
+            <div type="range" class="sdpi-item" id="temperature">
+                <div class="sdpi-item-label">Temperature</div>
+                <div class="sdpi-item-value">
+                    <span class="clickable" value="2700">2700</span>
+                    <input data-suffix="K" type="range" min="2700" max="6500" step="100" name="temperature"
+                        value="3200">
+                    <span class="clickable" value="6500">6500</span>
+                </div>
             </div>
-        </div>
-        <div type="range" class="sdpi-item" id="brightness">
-            <div class="sdpi-item-label">Brightness</div>
-            <div class="sdpi-item-value">
-                <span class="clickable" value="1">1</span>
-                <input data-suffix="%" type="range" min="1" max="100" name="brightness" value="50">
-                <span class="clickable" value="100">100</span>
+            <div type="range" class="sdpi-item" id="brightness">
+                <div class="sdpi-item-label">Brightness</div>
+                <div class="sdpi-item-value">
+                    <span class="clickable" value="1">1</span>
+                    <input data-suffix="%" type="range" min="1" max="100" name="brightness" value="50">
+                    <span class="clickable" value="100">100</span>
+                </div>
             </div>
-        </div>
-    </form>
-</div>
+        </form>
+    </div>
 
-<div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.off">
+    <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.back.colorpicker">
+        <form id="property-inspector">
+            <div class="sdpi-item" id="red">
+                <div class="sdpi-item-label">Red</div>
+                <input class="sdpi-item-value" type="number" min="0" max="255" name="red" value="255">
+            </div>
+            <div class="sdpi-item" id="green">
+                <div class="sdpi-item-label">Green</div>
+                <input class="sdpi-item-value" type="number" min="0" max="255" name="green" value="255">
+            </div>
+            <div class="sdpi-item" id="blue">
+                <div class="sdpi-item-label">Blue</div>
+                <input class="sdpi-item-value" type="number" min="0" max="255" name="blue" value="255">
+            </div>
+        </form>
+    </div>
 
-</div>
+    <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.off">
+
+    </div>
 </body>
 
 <script src="./libs/js/constants.js"></script>
@@ -85,7 +103,7 @@
 
         console.log("KELVIN", kelvin)
 
-        const {r, g, b} = getRGBFromTemperature(kelvin)
+        const { r, g, b } = getRGBFromTemperature(kelvin)
 
         console.log("rgb", r, g, b)
 
@@ -115,8 +133,8 @@
         let temperatureInput = document.querySelector('#temperature input');
         let brightnessInput = document.querySelector('#brightness input');
 
-        handleTemperatureChange({currentTarget: temperatureInput})
-        handleBrightnessChange({currentTarget: brightnessInput})
+        handleTemperatureChange({ currentTarget: temperatureInput })
+        handleBrightnessChange({ currentTarget: brightnessInput })
     })()
 </script>
 

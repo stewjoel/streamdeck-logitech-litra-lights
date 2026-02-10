@@ -114,13 +114,19 @@ func TestConvertBrightnessTarget(t *testing.T) {
 		t.Errorf("Expected FID 0x06 for FrontLight, got 0x%02x", result[2])
 	}
 
-	// Back light should use FID 0x0a
+	// Back light should use FID 0x0a and function 0x2b
 	result, err = ConvertBrightnessTarget(BackLight, 50)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if result[2] != 0x0a {
 		t.Errorf("Expected FID 0x0a for BackLight, got 0x%02x", result[2])
+	}
+	if result[3] != 0x2b {
+		t.Errorf("Expected function 0x2b for BackLight brightness, got 0x%02x", result[3])
+	}
+	if result[5] != 50 {
+		t.Errorf("Expected direct percentage 50 for BackLight brightness, got %d", result[5])
 	}
 }
 
@@ -131,8 +137,8 @@ func TestConvertLightsOnTarget(t *testing.T) {
 	}
 
 	back := ConvertLightsOnTarget(BackLight)
-	if back[2] != 0x0a || back[4] != 0x01 {
-		t.Errorf("Back ON incorrect: % x", back[:6])
+	if back[2] != 0x0a || back[3] != 0x4b || back[4] != 0x01 {
+		t.Errorf("Back ON incorrect: % x (expected FID=0x0a, func=0x4b, val=0x01)", back[:6])
 	}
 }
 

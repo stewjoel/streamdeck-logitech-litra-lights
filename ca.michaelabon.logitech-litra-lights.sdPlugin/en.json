@@ -6,10 +6,36 @@
 		"Tooltip": "Set your lights’ brightness and temperature"
 	},
 	"ca.michaelabon.logitech-litra-lights.off.action": {
-		"Name": "Turn Off Litra Lights",
-		"Tooltip": "Turn off your lights"
+		"Name": "Turn Off All Lights",
+		"Tooltip": "Turn off both front and back lights"
 	},
-	"Localization": {
-
-	}
+	"ca.michaelabon.logitech-litra-lights.front.power.action": {
+		"Name": "Front Light Power",
+		"Tooltip": "Toggle the front light"
+	},
+	"ca.michaelabon.logitech-litra-lights.back.power.action": {
+		"Name": "Back Light Power",
+		"Tooltip": "Toggle the back light"
+	},
+	"ca.michaelabon.logitech-litra-lights.front.temperature.action": {
+		"Name": "Front Temp Cycle",
+		"Tooltip": "Cycle front light temperature"
+	},
+	"ca.michaelabon.logitech-litra-lights.front.brightness.action": {
+		"Name": "Front Brightness Cycle",
+		"Tooltip": "Cycle front light brightness"
+	},
+	"ca.michaelabon.logitech-litra-lights.back.brightness.action": {
+		"Name": "Back Brightness Cycle",
+		"Tooltip": "Cycle back light brightness"
+	},
+	"ca.michaelabon.logitech-litra-lights.back.color.action": {
+		"Name": "Back Color Cycle",
+		"Tooltip": "Cycle back light RGB color"
+	},
+	"ca.michaelabon.logitech-litra-lights.back.colorpicker.action": {
+		"Name": "Back Color Picker",
+		"Tooltip": "Set back light to a specific RGB color"
+	},
+	"Localization": {}
 }

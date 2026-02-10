@@ -104,6 +104,36 @@
 			"SupportedInMultiActions": true,
 			"Tooltip": "Cycle back light brightness (20%-100%)",
 			"UUID": "ca.michaelabon.logitech-litra-lights.back.brightness"
+		},
+		{
+			"Icon": "icons/setLightsAction",
+			"Name": "Back Color Cycle",
+			"States": [
+				{
+					"Image": "icons/setLightsAction",
+					"TitleAlignment": "middle",
+					"Title": "Color",
+					"FontSize": 18
+				}
+			],
+			"SupportedInMultiActions": true,
+			"Tooltip": "Cycle back light color",
+			"UUID": "ca.michaelabon.logitech-litra-lights.back.color"
+		},
+		{
+			"Icon": "icons/setLightsAction",
+			"Name": "Back Color Picker",
+			"States": [
+				{
+					"Image": "icons/setLightsAction",
+					"TitleAlignment": "middle",
+					"Title": "Set",
+					"FontSize": 18
+				}
+			],
+			"SupportedInMultiActions": true,
+			"Tooltip": "Set back light to a specific color",
+			"UUID": "ca.michaelabon.logitech-litra-lights.back.colorpicker"
 		}
 	],
 	"Author": "Michael Abon",

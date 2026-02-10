@@ -46,8 +46,11 @@ build: setup-hidapi
 # Generic/Windows build
 [windows]
 build: setup-hidapi
-    $env:CGO_ENABLED="1"; $env:GOOS="windows"; $env:GOARCH="amd64"; $env:CC="x86_64-w64-mingw32-gcc"; $env:CGO_LDFLAGS="-static-libgcc -L{{ justfile_directory() }}/{{ HIDAPI_DIR }}/windows -lhidapi"; {{ GO }} build -C go {{ GOFLAGS }} -o ../{{ PLUGIN }}/{{ TARGET }}.exe .
-    cp {{ HIDAPI_DIR }}/windows/hidapi.dll {{ PLUGIN }}/
+    # CRITICAL: -ldflags "-s -w" is REQUIRED on Windows to strip debug symbols.
+    # Without it, TDM-GCC + CGO produces an invalid PE executable that Windows rejects.
+    $env:CGO_ENABLED="1"; $env:GOOS="windows"; $env:GOARCH="amd64"; $env:CC="gcc"; $env:CGO_LDFLAGS="-static-libgcc -L{{ justfile_directory() }}/{{ HIDAPI_DIR }}/windows -lhidapi"; {{ GO }} build -C go {{ GOFLAGS }} -ldflags "-s -w" -o ../{{ PLUGIN }}/{{ TARGET }}.exe .
+    Copy-Item "{{ HIDAPI_DIR }}/windows/hidapi.dll" "{{ PLUGIN }}/hidapi.dll" -Force
+    Copy-Item "{{ HIDAPI_DIR }}/windows/hidapi.dll" "{{ PLUGIN }}/build/hidapi.dll" -Force
 
 # WSL support
 [linux]
@@ -89,13 +92,13 @@ setup-hidapi:
     fi
 
 clean:
-    rm -f {{ PLUGIN }}/{{ TARGET }}
-    rm -f {{ PLUGIN }}/{{ TARGET }}_arm64
-    rm -f {{ PLUGIN }}/{{ TARGET }}.exe
-    rm -f {{ PLUGIN }}/hidapi.dll
-    rm -f {{ PLUGIN }}/libhidapi.dylib
-    rm -f {{ PLUGIN }}/logs/*
-    rm -rf ./hidapi
+    if (Test-Path "{{ PLUGIN }}/{{ TARGET }}") { Remove-Item -Force "{{ PLUGIN }}/{{ TARGET }}" }
+    if (Test-Path "{{ PLUGIN }}/{{ TARGET }}_arm64") { Remove-Item -Force "{{ PLUGIN }}/{{ TARGET }}_arm64" }
+    if (Test-Path "{{ PLUGIN }}/{{ TARGET }}.exe") { Remove-Item -Force "{{ PLUGIN }}/{{ TARGET }}.exe" }
+    if (Test-Path "{{ PLUGIN }}/hidapi.dll") { Remove-Item -Force "{{ PLUGIN }}/hidapi.dll" }
+    if (Test-Path "{{ PLUGIN }}/libhidapi.dylib") { Remove-Item -Force "{{ PLUGIN }}/libhidapi.dylib" }
+    if (Test-Path "{{ PLUGIN }}/logs/*") { Remove-Item -Force "{{ PLUGIN }}/logs/*" }
+    if (Test-Path "./hidapi") { Remove-Item -Recurse -Force "./hidapi" }
 
 ## INSTALL DEV DEPENDENCIES
 [windows]
@@ -132,7 +135,8 @@ link:
 
 [windows]
 link:
-    mklink /D "%AppData%\Elgato\StreamDeck\Plugins\{{ PLUGIN }}" "{{ justfile_directory() }}/{{ PLUGIN }}"
+    if (Test-Path "$env:APPDATA\Elgato\StreamDeck\Plugins\{{ PLUGIN }}") { Remove-Item -Recurse -Force "$env:APPDATA\Elgato\StreamDeck\Plugins\{{ PLUGIN }}" }
+    Copy-Item -Recurse -Force "{{ PLUGIN }}" "$env:APPDATA\Elgato\StreamDeck\Plugins\{{ PLUGIN }}"
 
 [macos]
 unlink:

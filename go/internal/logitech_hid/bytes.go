@@ -9,9 +9,13 @@ const byteLength = 20
 
 // Feature IDs for the Litra Beam LX
 const (
-	FrontLightFID = 0x06 // Front (white) light feature ID
-	BackLightFID  = 0x0a // Back (RGB) light feature ID
+	FrontLightFID     = 0x06 // Front (white) light feature ID
+	BackLightFID      = 0x0a // Back (RGB) light power/brightness feature ID
+	BackLightColorFID = 0x0C // Back (RGB) light color zone feature ID
 )
+
+// Number of color zones on the back light
+const BackLightZoneCount = 7
 
 // LightTarget specifies which light to control
 type LightTarget byte
@@ -33,13 +37,23 @@ func ConvertLightsOff() (b []byte) {
 
 func ConvertLightsOnTarget(target LightTarget) (b []byte) {
 	b = make([]byte, byteLength)
-	copy(b, []byte{0x11, 0xff, byte(target), 0x1c, 0x01})
+	if target == BackLight {
+		// Back light uses function 0x4b for power control
+		copy(b, []byte{0x11, 0xff, byte(target), 0x4b, 0x01})
+	} else {
+		copy(b, []byte{0x11, 0xff, byte(target), 0x1c, 0x01})
+	}
 	return
 }
 
 func ConvertLightsOffTarget(target LightTarget) (b []byte) {
 	b = make([]byte, byteLength)
-	copy(b, []byte{0x11, 0xff, byte(target), 0x1c, 0x00})
+	if target == BackLight {
+		// Back light uses function 0x4b for power control
+		copy(b, []byte{0x11, 0xff, byte(target), 0x4b, 0x00})
+	} else {
+		copy(b, []byte{0x11, 0xff, byte(target), 0x1c, 0x00})
+	}
 	return
 }
 
@@ -65,7 +79,14 @@ func ConvertBrightnessTarget(target LightTarget, percentage uint8) ([]byte, erro
 	}
 
 	b := make([]byte, byteLength)
-	copy(b, []byte{0x11, 0xff, byte(target), 0x4c, 0x00, calcBrightness(percentage)})
+
+	if target == BackLight {
+		// Back light brightness uses function 0x2b with direct percentage value
+		copy(b, []byte{0x11, 0xff, byte(target), 0x2b, 0x00, percentage})
+	} else {
+		// Front light brightness uses function 0x4c with mapped value
+		copy(b, []byte{0x11, 0xff, byte(target), 0x4c, 0x00, calcBrightness(percentage)})
+	}
 
 	return b, nil
 }
@@ -101,6 +122,63 @@ func ConvertTemperatureTarget(target LightTarget, temperature uint16) ([]byte, e
 	b[5] = byte(temperature)
 
 	return b, nil
+}
+
+// --- Back Light Color ---
+
+// ConvertBackColorZone generates the command to set a single zone's RGB color.
+// Zone IDs range from 1 to 7. RGB values are clamped to minimum 1.
+// After setting all desired zones, you must call ConvertBackColorCommit() and write it.
+func ConvertBackColorZone(zone uint8, r, g, b uint8) []byte {
+	// The device freaks out if RGB values are 0, clamp to 1
+	if r == 0 {
+		r = 1
+	}
+	if g == 0 {
+		g = 1
+	}
+	if b == 0 {
+		b = 1
+	}
+
+	buf := make([]byte, byteLength)
+	copy(buf, []byte{
+		0x11, 0xff, BackLightColorFID, 0x1B,
+		zone, r, g, b,
+		0xFF, 0x00, 0x00, 0x00,
+		0xFF, 0x00, 0x00, 0x00,
+		0xFF, 0x00, 0x00, 0x00,
+	})
+	return buf
+}
+
+// ConvertBackColorCommit generates the commit command that must be sent
+// after setting zone colors to apply the changes.
+func ConvertBackColorCommit() []byte {
+	buf := make([]byte, byteLength)
+	copy(buf, []byte{0x11, 0xff, BackLightColorFID, 0x7B, 0x00, 0x00, 0x01, 0x00, 0x00})
+	return buf
+}
+
+// ConvertBackColorAllZones generates a sequence of commands to set ALL 7 zones
+// to the same RGB color, including the final commit command.
+// Returns a slice of byte slices that should be written in order.
+func ConvertBackColorAllZones(r, g, b uint8) [][]byte {
+	commands := make([][]byte, BackLightZoneCount+1)
+	for i := uint8(1); i <= BackLightZoneCount; i++ {
+		commands[i-1] = ConvertBackColorZone(i, r, g, b)
+	}
+	commands[BackLightZoneCount] = ConvertBackColorCommit()
+	return commands
+}
+
+// ConvertColorTarget is a convenience wrapper that sets back light color on all zones.
+// For the front light, this is a no-op (front light doesn't support RGB).
+func ConvertColorTarget(target LightTarget, r, g, b uint8) ([][]byte, error) {
+	if target != BackLight {
+		return nil, fmt.Errorf("RGB color is only supported on BackLight target")
+	}
+	return ConvertBackColorAllZones(r, g, b), nil
 }
 
 // --- Internal helpers ---
