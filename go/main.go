@@ -8,6 +8,9 @@ import (
 	"os"
 	"strconv"
 
+	"os/signal"
+	"syscall"
+
 	logitech "github.com/michaelabon/streamdeck-logitech-litra/internal/logitech_hid"
 	"github.com/samwho/streamdeck"
 	"github.com/sstallion/go-hid"
@@ -132,7 +135,24 @@ func run(ctx context.Context) error {
 	client := streamdeck.NewClient(ctx, params)
 	setup(client)
 
-	return client.Run()
+	// Set up signal handling for graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-stop
+		log.Println("Received termination signal, turning off lights...")
+		_ = writeToLights(sendTurnOffLights())
+		os.Exit(0)
+	}()
+
+	err = client.Run()
+
+	// Power off all lights when Stream Deck quits
+	log.Println("Plugin exiting, turning off lights...")
+	_ = writeToLights(sendTurnOffLights())
+
+	return err
 }
 
 func setup(client *streamdeck.Client) {

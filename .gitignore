@@ -347,3 +347,11 @@ TODO.txt
 hidapi/
 ca.michaelabon.logitech-litra-lights.sdPlugin/hidapi.dll
 ca.michaelabon.logitech-litra-lights.sdPlugin/libhidapi.dylib
+
+# Generic binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.log
+!ca.michaelabon.logitech-litra-lights.sdPlugin/build/*.exe
