@@ -27,30 +27,9 @@ Until this is listed on the Elgato Marketplace, you can build it manually:
 3. **Restart**: Restart your Stream Deck application.
 4. **Configure**: Drag the new "Logitech Litra" actions onto your keys and use the Property Inspector to set colors and presets.
 
-## How to Create a New Release
+## Development
 
-To create an official release for GitHub:
-
-1. **Tag the Commit**: Mark the state of the code with a version tag.
-   ```powershell
-   git tag -a v2.1.0 -m "Release version 2.1.0"
-   ```
-2. **Push Up**: Send the tags to GitHub.
-   ```powershell
-   git push origin main --tags
-   ```
-3. **Draft on GitHub**:
-   - Go to your repository on GitHub.com.
-   - Click on **Releases** > **Draft a new release**.
-   - Select the tag you just pushed.
-   - Add a title and description (you can copy from `CHANGELOG.md`).
-   - Click **Publish release**.
-
-## How do I contribute?
-
-Pull requests are welcome! I have split the codebase into two parts:
-1. `go/`: The Go backend for HID communication.
-2. `ca.michaelabon.logitechlitra.sdPlugin/`: PI (UI) files and manifest.
+If you're looking to contribute or want to know how to build and release the plugin, please see [DEVELOPMENT.md](./DEVELOPMENT.md).
 
 ## License
 
