@@ -2,7 +2,7 @@
 
 A premium Stream Deck plugin for controlling Logitech Litra lights, specifically optimized for the **Litra Beam LX**.
 
-*Based on the original work by [Michael Abon](https://github.com/michaelabon/streamdeck-logitech-litra](https://github.com/michaelabon/streamdeck-logitech-litra-lights)).*
+*Based on the original work by [Michael Abon](https://github.com/michaelabon/streamdeck-logitech-litra-lights).*
 
 ![Litra Beam LX](ca.michaelabon.logitech-litra-lights.sdPlugin/icons/pluginIcon.svg)
 
