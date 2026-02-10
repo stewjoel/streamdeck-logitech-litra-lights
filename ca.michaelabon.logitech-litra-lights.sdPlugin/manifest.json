@@ -2,11 +2,11 @@
 	"$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
 	"Actions": [
 		{
-			"Icon": "icons/setLightsAction",
+			"Icon": "icons/litra_front",
 			"Name": "Set Brightness & Temperature",
 			"States": [
 				{
-					"Image": "icons/setLightsAction",
+					"Image": "icons/litra_front",
 					"TitleAlignment": "middle",
 					"FontSize": 24
 				}
@@ -16,11 +16,11 @@
 			"UUID": "ca.michaelabon.logitech-litra-lights.set"
 		},
 		{
-			"Icon": "icons/turnOffLightsAction",
+			"Icon": "icons/litra_off",
 			"Name": "Turn Off All Lights",
 			"States": [
 				{
-					"Image": "icons/turnOffLightsAction",
+					"Image": "icons/litra_off",
 					"TitleAlignment": "middle",
 					"Title": "Off",
 					"FontSize": 24
@@ -31,11 +31,11 @@
 			"UUID": "ca.michaelabon.logitech-litra-lights.off"
 		},
 		{
-			"Icon": "icons/setLightsAction",
+			"Icon": "icons/litra_front_power",
 			"Name": "Front Light Power",
 			"States": [
 				{
-					"Image": "icons/setLightsAction",
+					"Image": "icons/litra_front_power",
 					"TitleAlignment": "middle",
 					"Title": "Front",
 					"FontSize": 18
@@ -46,11 +46,11 @@
 			"UUID": "ca.michaelabon.logitech-litra-lights.front.power"
 		},
 		{
-			"Icon": "icons/turnOffLightsAction",
+			"Icon": "icons/litra_back_power",
 			"Name": "Back Light Power",
 			"States": [
 				{
-					"Image": "icons/turnOffLightsAction",
+					"Image": "icons/litra_back_power",
 					"TitleAlignment": "middle",
 					"Title": "Back",
 					"FontSize": 18
@@ -61,11 +61,11 @@
 			"UUID": "ca.michaelabon.logitech-litra-lights.back.power"
 		},
 		{
-			"Icon": "icons/setLightsAction",
+			"Icon": "icons/litra_front",
 			"Name": "Front Temp Cycle",
 			"States": [
 				{
-					"Image": "icons/setLightsAction",
+					"Image": "icons/litra_front",
 					"TitleAlignment": "middle",
 					"Title": "Temp",
 					"FontSize": 18
@@ -76,11 +76,11 @@
 			"UUID": "ca.michaelabon.logitech-litra-lights.front.temperature"
 		},
 		{
-			"Icon": "icons/setLightsAction",
+			"Icon": "icons/litra_front_bright",
 			"Name": "Front Brightness Cycle",
 			"States": [
 				{
-					"Image": "icons/setLightsAction",
+					"Image": "icons/litra_front_bright",
 					"TitleAlignment": "middle",
 					"Title": "Bright",
 					"FontSize": 18
@@ -91,11 +91,11 @@
 			"UUID": "ca.michaelabon.logitech-litra-lights.front.brightness"
 		},
 		{
-			"Icon": "icons/turnOffLightsAction",
+			"Icon": "icons/litra_back_bright",
 			"Name": "Back Brightness Cycle",
 			"States": [
 				{
-					"Image": "icons/turnOffLightsAction",
+					"Image": "icons/litra_back_bright",
 					"TitleAlignment": "middle",
 					"Title": "Bright",
 					"FontSize": 18
@@ -106,11 +106,11 @@
 			"UUID": "ca.michaelabon.logitech-litra-lights.back.brightness"
 		},
 		{
-			"Icon": "icons/setLightsAction",
+			"Icon": "icons/litra_back_cycle",
 			"Name": "Back Color Cycle",
 			"States": [
 				{
-					"Image": "icons/setLightsAction",
+					"Image": "icons/litra_back_cycle",
 					"TitleAlignment": "middle",
 					"Title": "Color",
 					"FontSize": 18
@@ -121,11 +121,11 @@
 			"UUID": "ca.michaelabon.logitech-litra-lights.back.color"
 		},
 		{
-			"Icon": "icons/setLightsAction",
+			"Icon": "icons/litra_back",
 			"Name": "Back Color Picker",
 			"States": [
 				{
-					"Image": "icons/setLightsAction",
+					"Image": "icons/litra_back",
 					"TitleAlignment": "middle",
 					"Title": "Set",
 					"FontSize": 18
@@ -134,15 +134,30 @@
 			"SupportedInMultiActions": true,
 			"Tooltip": "Set back light to a specific color",
 			"UUID": "ca.michaelabon.logitech-litra-lights.back.colorpicker"
+		},
+		{
+			"Icon": "icons/litra_preset_cycle",
+			"Name": "Back Preset Cycle",
+			"States": [
+				{
+					"Image": "icons/litra_preset_cycle",
+					"TitleAlignment": "middle",
+					"Title": "Presets",
+					"FontSize": 18
+				}
+			],
+			"SupportedInMultiActions": true,
+			"Tooltip": "Cycle through your saved color/gradient presets",
+			"UUID": "ca.michaelabon.logitech-litra-lights.back.presets"
 		}
 	],
 	"Author": "Michael Abon",
 	"Category": "Logitech Litra",
-	"CategoryIcon": "icons/categoryIcon",
+	"CategoryIcon": "icons/category_icon",
 	"CodePathMac": "build/streamdeck-logitech-litra-lights_arm64",
 	"CodePath": "build/streamdeck-logitech-litra-lights.exe",
 	"Description": "Control your Logitech Litra Beam LX lights directly from the Stream Deck.",
-	"Icon": "icons/pluginIcon",
+	"Icon": "icons/litra_back",
 	"Name": "Logitech Litra",
 	"OS": [
 		{

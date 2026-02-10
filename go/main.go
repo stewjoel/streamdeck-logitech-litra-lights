@@ -62,6 +62,29 @@ func hexToRGB(hex string) (uint8, uint8, uint8) {
 	return uint8(r), uint8(g), uint8(b)
 }
 
+// Preset represents a saved color or gradient
+type Preset struct {
+	Mode   string `json:"mode"`   // "solid" or "gradient"
+	Color  string `json:"color"`  // hex color like "#ff0000"
+	Color2 string `json:"color2"` // second hex color for gradient
+}
+
+// PresetCycleSettings stores a list of presets and the current index
+type PresetCycleSettings struct {
+	Presets []Preset `json:"presets"`
+	Index   int      `json:"cycleIndex"`
+}
+
+// --- Internal helpers for color conversion ---
+
+func getRGBFromPreset(p Preset) (r, g, b, r2, g2, b2 uint8) {
+	r, g, b = hexToRGB(p.Color)
+	if p.Mode == "gradient" {
+		r2, g2, b2 = hexToRGB(p.Color2)
+	}
+	return
+}
+
 const (
 	VID       = 0x046d
 	PID       = 0xc903
@@ -127,6 +150,7 @@ func setup(client *streamdeck.Client) {
 	setupBackBrightnessCycleAction(client)
 	setupBackColorCycleAction(client)
 	setupBackColorPickerAction(client)
+	setupBackPresetCycleAction(client)
 }
 
 // --- Back Color Picker ---
@@ -258,6 +282,99 @@ func setupBackColorCycleAction(client *streamdeck.Client) {
 			return client.SetTitle(ctx, color.name, streamdeck.HardwareAndSoftware)
 		},
 	)
+}
+
+// --- Back Preset Cycle ---
+func setupBackPresetCycleAction(client *streamdeck.Client) {
+	action := client.Action("ca.michaelabon.logitech-litra-lights.back.presets")
+	settings := make(map[string]*PresetCycleSettings)
+
+	handler := func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+		p := streamdeck.WillAppearPayload{}
+		if err := json.Unmarshal(event.Payload, &p); err != nil {
+			return err
+		}
+
+		s, ok := settings[event.Context]
+		if !ok {
+			s = &PresetCycleSettings{
+				Presets: []Preset{},
+				Index:   0,
+			}
+			settings[event.Context] = s
+		}
+
+		if err := json.Unmarshal(p.Settings, s); err != nil {
+			return err
+		}
+
+		if len(s.Presets) > 0 {
+			idx := s.Index % len(s.Presets)
+			preset := s.Presets[idx]
+			title := "Set"
+			if preset.Mode == "gradient" {
+				title = "Grad"
+			}
+			client.SetTitle(ctx, fmt.Sprintf("%s\n%d/%d", title, idx+1, len(s.Presets)), streamdeck.HardwareAndSoftware)
+		} else {
+			client.SetTitle(ctx, "None", streamdeck.HardwareAndSoftware)
+		}
+
+		if event.Event == streamdeck.KeyDown {
+			if len(s.Presets) == 0 {
+				return nil
+			}
+
+			idx := s.Index % len(s.Presets)
+			preset := s.Presets[idx]
+
+			// Advance index for next time
+			s.Index = (s.Index + 1) % len(s.Presets)
+			client.SetSettings(ctx, s)
+
+			r1, g1, b1, r2, g2, b2 := getRGBFromPreset(preset)
+			log.Printf("Back Preset Cycle: Applying preset %d/%d (mode=%s)\n", idx+1, len(s.Presets), preset.Mode)
+
+			err := writeToLights(func(deviceInfo *hid.DeviceInfo) error {
+				d, err := hid.OpenPath(deviceInfo.Path)
+				if err != nil {
+					return err
+				}
+				defer d.Close()
+
+				// Turn on first
+				onBytes := logitech.ConvertLightsOnTarget(logitech.BackLight)
+				if _, err := d.Write(onBytes); err != nil {
+					return err
+				}
+
+				var commands [][]byte
+				if preset.Mode == "gradient" {
+					commands = logitech.ConvertBackColorGradient(r1, g1, b1, r2, g2, b2)
+				} else {
+					commands, _ = logitech.ConvertColorTarget(logitech.BackLight, r1, g1, b1)
+				}
+
+				for _, cmd := range commands {
+					if _, err := d.Write(cmd); err != nil {
+						return err
+					}
+				}
+				return nil
+			})
+
+			if err != nil {
+				log.Println("Error applying preset:", err)
+				return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
+			}
+		}
+
+		return nil
+	}
+
+	action.RegisterHandler(streamdeck.WillAppear, handler)
+	action.RegisterHandler(streamdeck.DidReceiveSettings, handler)
+	action.RegisterHandler(streamdeck.KeyDown, handler)
 }
 
 // --- Power States (in-memory tracking) ---

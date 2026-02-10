@@ -1,32 +1,11 @@
-<?xml version="1.0"?>
-<svg
-    xmlns="http://www.w3.org/2000/svg"
-    version="1.1"
-    width="1000"
-    height="1000"
-  >
-  <rect
-      width="1000"
-      height="1000"
-      fill="black"
-  />
-  <rect
-      x="200"
-      y="200"
-      width="600"
-      height="600"
-      stroke="#333333"
-      fill="#b9b9b9"
-      rx="40"
-      ry="40"
-      stroke-width="10"
-  />
-
-  <path
-      d="M400,800c0,75,-50,0,-50,150v50h300v-50c0,-150,-50,-75,-50,-150z"
-      stroke="#333333"
-      fill="#181111"
-      stroke-width="10"
-  />
-</svg
->
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="40" fill="#121212"/>
+  <defs>
+    <linearGradient id="mainGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF0000;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#00FF00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#000AFF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect x="40" y="115" width="176" height="26" rx="13" fill="url(#mainGlow)"/>
+</svg>

@@ -22,6 +22,11 @@ $PI.onConnected((jsn) => {
                     })
                 );
             }
+            if (actionInfo.action === 'ca.michaelabon.logitech-litra-lights.back.presets') {
+                if (settings.presets && typeof updatePresetsUI === 'function') {
+                    updatePresetsUI(settings.presets);
+                }
+            }
         }
     }
 

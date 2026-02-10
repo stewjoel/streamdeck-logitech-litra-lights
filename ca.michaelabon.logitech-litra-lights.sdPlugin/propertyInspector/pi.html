@@ -83,6 +83,34 @@
         </form>
     </div>
 
+    <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.back.presets">
+        <form id="presets-form">
+            <div class="sdpi-heading">Add New Preset</div>
+            <div class="sdpi-item">
+                <div class="sdpi-item-label">Mode</div>
+                <div class="sdpi-item-value">
+                    <select id="presetMode">
+                        <option value="solid">Solid</option>
+                        <option value="gradient">Gradient</option>
+                    </select>
+                </div>
+            </div>
+            <div class="sdpi-item" type="color">
+                <div class="sdpi-item-label">Colors</div>
+                <div class="sdpi-item-value" style="display:flex;align-items:center;gap:8px;">
+                    <input type="color" id="presetColor1" value="#ff0000" style="width:30px;height:26px;">
+                    <input type="color" id="presetColor2" value="#0000ff" style="width:30px;height:26px;display:none;">
+                    <button class="sdpi-item-value" id="addPresetBtn" style="height:26px;margin:0;">Add</button>
+                </div>
+            </div>
+
+            <div class="sdpi-heading">Your Presets</div>
+            <div id="presetsList" style="margin: 0 14px 10px 14px; max-height: 200px; overflow-y: auto;">
+                <!-- Presets will be listed here -->
+            </div>
+        </form>
+    </div>
+
     <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.off">
 
     </div>
@@ -142,20 +170,121 @@
         event.currentTarget.style.accentColor = `hsl(0, 0%, ${v}%)`
     }
 
+    const handleColorChange = () => {
+        const mode = document.getElementById('colorMode').value;
+        const color1 = document.getElementById('colorInput1').value;
+        const color2 = document.getElementById('colorInput2').value;
+
+        document.getElementById('colorHex1').innerText = color1.toUpperCase();
+        document.getElementById('colorHex2').innerText = color2.toUpperCase();
+
+        const secondaryItem = document.getElementById('color-secondary');
+        const previewItem = document.getElementById('gradient-preview-container');
+
+        if (mode === 'gradient') {
+            secondaryItem.style.display = 'flex';
+            previewItem.style.display = 'flex';
+            document.getElementById('gradientPreview').style.background = `linear-gradient(to right, ${color1}, ${color2})`;
+        } else {
+            secondaryItem.style.display = 'none';
+            previewItem.style.display = 'none';
+        }
+    };
+
+    let currentPresets = [];
+
+    const updatePresetsUI = (presets) => {
+        currentPresets = presets || [];
+        const list = document.getElementById('presetsList');
+        list.innerHTML = '';
+        currentPresets.forEach((p, i) => {
+            const div = document.createElement('div');
+            div.style.display = 'flex';
+            div.style.alignItems = 'center';
+            div.style.marginBottom = '4px';
+            div.style.background = '#333';
+            div.style.padding = '4px';
+            div.style.borderRadius = '4px';
+
+            const preview = document.createElement('div');
+            preview.style.width = '40px';
+            preview.style.height = '16px';
+            preview.style.borderRadius = '2px';
+            preview.style.marginRight = '8px';
+            if (p.mode === 'gradient') {
+                preview.style.background = `linear-gradient(to right, ${p.color}, ${p.color2})`;
+            } else {
+                preview.style.background = p.color;
+            }
+
+            const label = document.createElement('span');
+            label.innerText = p.mode === 'gradient' ? 'Grad' : 'Solid';
+            label.style.fontSize = '10px';
+            label.style.flex = '1';
+
+            const delBtn = document.createElement('button');
+            delBtn.innerText = '×';
+            delBtn.style.padding = '0 6px';
+            delBtn.style.height = '20px';
+            delBtn.style.minHeight = '20px';
+            delBtn.onclick = () => {
+                currentPresets.splice(i, 1);
+                $PI.setSettings({ presets: currentPresets });
+                updatePresetsUI(currentPresets);
+            };
+
+            div.appendChild(preview);
+            div.appendChild(label);
+            div.appendChild(delBtn);
+            list.appendChild(div);
+        });
+    };
+
+    document.getElementById('presetMode').onchange = (e) => {
+        document.getElementById('presetColor2').style.display = e.target.value === 'gradient' ? 'inline-block' : 'none';
+    };
+
+    document.getElementById('addPresetBtn').onclick = (e) => {
+        e.preventDefault();
+        const mode = document.getElementById('presetMode').value;
+        const color = document.getElementById('presetColor1').value;
+        const color2 = document.getElementById('presetColor2').value;
+
+        currentPresets.push({ mode, color, color2 });
+        $PI.setSettings({ presets: currentPresets });
+        updatePresetsUI(currentPresets);
+    };
+
+    $PI.onDidReceiveSettings(({ payload }) => {
+        if (payload.settings.presets) {
+            updatePresetsUI(payload.settings.presets);
+        }
+    });
+
+    // We also need to catch the initial settings from onConnected
+    // Since pi.js might have already run, we can check if settings are available
+    // A better way is to hook into the onConnected in a way that doesn't conflict
+    // for now let's just let it be handled by onDidReceiveSettings which usually triggers
+
     let temperatureInput = document.querySelector('#temperature input');
-    temperatureInput.addEventListener("change", handleTemperatureChange)
-    temperatureInput.addEventListener("input", handleTemperatureChange)
+    temperatureInput.addEventListener("change", handleTemperatureChange);
+    temperatureInput.addEventListener("input", handleTemperatureChange);
     let brightnessInput = document.querySelector('#brightness input');
     brightnessInput.addEventListener("change", handleBrightnessChange);
     brightnessInput.addEventListener("input", handleBrightnessChange);
+
+    document.getElementById('colorMode').addEventListener('change', handleColorChange);
+    document.getElementById('colorInput1').addEventListener('input', handleColorChange);
+    document.getElementById('colorInput2').addEventListener('input', handleColorChange);
 
     (() => {
         let temperatureInput = document.querySelector('#temperature input');
         let brightnessInput = document.querySelector('#brightness input');
 
-        handleTemperatureChange({ currentTarget: temperatureInput })
-        handleBrightnessChange({ currentTarget: brightnessInput })
-    })()
+        handleTemperatureChange({ currentTarget: temperatureInput });
+        handleBrightnessChange({ currentTarget: brightnessInput });
+        handleColorChange();
+    })();
 </script>
 
 </html>
