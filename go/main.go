@@ -282,21 +282,28 @@ func setup(client *streamdeck.Client) {
 	setupSetLightsAction(client, settings)
 	setupTurnOffLightsAction(client)
 
-	// New Litra Beam LX actions
+	// Litra Beam LX actions
 	setupFrontPowerAction(client)
 	setupBackPowerAction(client)
 	setupFrontTempCycleAction(client)
 	setupFrontBrightnessCycleAction(client)
 	setupBackBrightnessCycleAction(client)
 	setupBackColorCycleAction(client)
-	setupBackColorPickerAction(client)
-	setupBackPresetCycleAction(client)
+	setupBackGradientCycleAction(client)
 }
 
-// --- Back Color Picker ---
-func setupBackColorPickerAction(client *streamdeck.Client) {
-	action := client.Action("ca.michaelabon.logitech-litra-lights.back.colorpicker")
-	settings := make(map[string]*RGBSettings)
+// ColorCycleSettings stores configurable solid color presets
+type ColorCycleSettings struct {
+	ColorPresets []string `json:"colorPresets"`
+	Index        int      `json:"cycleIndex"`
+}
+
+var defaultColorPresets = []string{"#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#FFFF00", "#00FFFF"}
+
+// --- Back Color Cycle (configurable solid color presets) ---
+func setupBackColorCycleAction(client *streamdeck.Client) {
+	action := client.Action("ca.michaelabon.logitech-litra-lights.back.color")
+	settings := make(map[string]*ColorCycleSettings)
 
 	handler := func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		p := streamdeck.WillAppearPayload{}
@@ -306,7 +313,10 @@ func setupBackColorPickerAction(client *streamdeck.Client) {
 
 		s, ok := settings[event.Context]
 		if !ok {
-			s = &RGBSettings{Red: 255, Green: 255, Blue: 255}
+			s = &ColorCycleSettings{
+				ColorPresets: append([]string{}, defaultColorPresets...),
+				Index:        0,
+			}
 			settings[event.Context] = s
 		}
 
@@ -314,66 +324,24 @@ func setupBackColorPickerAction(client *streamdeck.Client) {
 			return err
 		}
 
-		if event.Event == streamdeck.KeyDown {
-			r, g, b := s.GetRGB()
-			log.Printf("Back Color Picker: %d, %d, %d (mode=%s)\n", r, g, b, s.Mode)
-
-			onBytes := logitech.ConvertLightsOnTarget(logitech.BackLight)
-			commands := [][]byte{onBytes}
-
-			if s.Mode == "gradient" {
-				r2, g2, b2 := s.GetRGB2()
-				commands = append(commands, logitech.ConvertBackColorGradient(r, g, b, r2, g2, b2)...)
-			} else {
-				colorCmds, _ := logitech.ConvertColorTarget(logitech.BackLight, r, g, b)
-				commands = append(commands, colorCmds...)
-			}
-
-			if err := deviceMgr.WriteCommands(commands...); err != nil {
-				log.Println("Error setting color picker color:", err)
-				return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
-			}
+		// Use defaults if no presets configured
+		if len(s.ColorPresets) == 0 {
+			s.ColorPresets = append([]string{}, defaultColorPresets...)
 		}
 
-		return nil
-	}
+		if event.Event == streamdeck.KeyDown {
+			idx := s.Index % len(s.ColorPresets)
+			hex := s.ColorPresets[idx]
+			r, g, b := hexToRGB(hex)
 
-	action.RegisterHandler(streamdeck.WillAppear, handler)
-	action.RegisterHandler(streamdeck.DidReceiveSettings, handler)
-	action.RegisterHandler(streamdeck.KeyDown, handler)
-}
+			// Advance index for next press
+			s.Index = (s.Index + 1) % len(s.ColorPresets)
+			client.SetSettings(ctx, s)
 
-// --- Back Color Cycle ---
-func setupBackColorCycleAction(client *streamdeck.Client) {
-	action := client.Action("ca.michaelabon.logitech-litra-lights.back.color")
-	cycleIndexes := make(map[string]int)
-
-	type rgb struct {
-		r, g, b uint8
-		name    string
-	}
-
-	defaultColors := []rgb{
-		{255, 0, 0, "Red"},
-		{0, 255, 0, "Green"},
-		{0, 0, 255, "Blue"},
-		{255, 0, 255, "Mag"},
-		{255, 255, 0, "Yel"},
-		{0, 255, 255, "Cyan"},
-		{255, 255, 255, "White"},
-	}
-
-	action.RegisterHandler(
-		streamdeck.KeyDown,
-		func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-			idx := cycleIndexes[event.Context]
-			color := defaultColors[idx%len(defaultColors)]
-			cycleIndexes[event.Context] = (idx + 1) % len(defaultColors)
-
-			log.Printf("Back Color Cycle: %s (%d, %d, %d)\n", color.name, color.r, color.g, color.b)
+			log.Printf("Back Color Cycle: %s (%d, %d, %d) [%d/%d]\n", hex, r, g, b, idx+1, len(s.ColorPresets))
 
 			onBytes := logitech.ConvertLightsOnTarget(logitech.BackLight)
-			colorCmds, err := logitech.ConvertColorTarget(logitech.BackLight, color.r, color.g, color.b)
+			colorCmds, err := logitech.ConvertColorTarget(logitech.BackLight, r, g, b)
 			if err != nil {
 				log.Println("Error building color commands:", err)
 				return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
@@ -385,13 +353,29 @@ func setupBackColorCycleAction(client *streamdeck.Client) {
 				return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
 			}
 
-			return client.SetTitle(ctx, color.name, streamdeck.HardwareAndSoftware)
-		},
-	)
+			// Remember for back power restore
+			lastBackLightCmds = colorCmds
+
+			// Show a short label
+			return client.SetTitle(ctx, fmt.Sprintf("%d/%d", idx+1, len(s.ColorPresets)), streamdeck.HardwareAndSoftware)
+		}
+
+		// Non-keydown: show current position
+		if len(s.ColorPresets) > 0 {
+			idx := s.Index % len(s.ColorPresets)
+			client.SetTitle(ctx, fmt.Sprintf("%d/%d", idx+1, len(s.ColorPresets)), streamdeck.HardwareAndSoftware)
+		}
+
+		return nil
+	}
+
+	action.RegisterHandler(streamdeck.WillAppear, handler)
+	action.RegisterHandler(streamdeck.DidReceiveSettings, handler)
+	action.RegisterHandler(streamdeck.KeyDown, handler)
 }
 
-// --- Back Preset Cycle ---
-func setupBackPresetCycleAction(client *streamdeck.Client) {
+// --- Back Gradient Cycle ---
+func setupBackGradientCycleAction(client *streamdeck.Client) {
 	action := client.Action("ca.michaelabon.logitech-litra-lights.back.presets")
 	settings := make(map[string]*PresetCycleSettings)
 
@@ -454,6 +438,9 @@ func setupBackPresetCycleAction(client *streamdeck.Client) {
 				log.Println("Error applying preset:", err)
 				return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
 			}
+
+			// Remember for back power restore (commands without the onBytes)
+			lastBackLightCmds = commands[1:]
 		}
 
 		return nil
@@ -466,8 +453,9 @@ func setupBackPresetCycleAction(client *streamdeck.Client) {
 
 // --- Power States (in-memory tracking) ---
 var (
-	frontOn = make(map[string]bool)
-	backOn  = make(map[string]bool)
+	frontOn           = make(map[string]bool)
+	backOn            = make(map[string]bool)
+	lastBackLightCmds [][]byte // tracks the last color/gradient commands sent to the back light
 )
 
 // --- Front Power On/Off ---
@@ -512,18 +500,28 @@ func setupBackPowerAction(client *streamdeck.Client) {
 			isOn := backOn[event.Context]
 			backOn[event.Context] = !isOn
 
-			var byteSequence []byte
 			if !isOn {
 				log.Println("Back Power: ON")
-				byteSequence = logitech.ConvertLightsOnTarget(logitech.BackLight)
+				onBytes := logitech.ConvertLightsOnTarget(logitech.BackLight)
+				// Re-apply last color if available
+				if len(lastBackLightCmds) > 0 {
+					cmds := append([][]byte{onBytes}, lastBackLightCmds...)
+					if err := deviceMgr.WriteCommands(cmds...); err != nil {
+						log.Println("Error toggling back power:", err)
+						return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
+					}
+				} else {
+					if err := deviceMgr.WriteCommands(onBytes); err != nil {
+						log.Println("Error toggling back power:", err)
+						return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
+					}
+				}
 			} else {
 				log.Println("Back Power: OFF")
-				byteSequence = logitech.ConvertLightsOffTarget(logitech.BackLight)
-			}
-
-			if err := deviceMgr.WriteCommands(byteSequence); err != nil {
-				log.Println("Error toggling back power:", err)
-				return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
+				if err := deviceMgr.WriteCommands(logitech.ConvertLightsOffTarget(logitech.BackLight)); err != nil {
+					log.Println("Error toggling back power:", err)
+					return client.SetTitle(ctx, "Err", streamdeck.HardwareAndSoftware)
+				}
 			}
 
 			if !isOn {

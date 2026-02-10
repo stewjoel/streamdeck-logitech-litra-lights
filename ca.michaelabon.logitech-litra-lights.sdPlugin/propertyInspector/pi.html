@@ -46,65 +46,32 @@
         </form>
     </div>
 
-    <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.back.colorpicker">
-        <form id="property-inspector">
-            <div class="sdpi-item" id="mode-select">
-                <div class="sdpi-item-label">Mode</div>
-                <div class="sdpi-item-value">
-                    <select name="mode" id="colorMode">
-                        <option value="solid">Solid Color</option>
-                        <option value="gradient">Gradient</option>
-                    </select>
-                </div>
-            </div>
-            <div class="sdpi-item" id="color-primary" type="color">
-                <div class="sdpi-item-label">Color</div>
-                <div class="sdpi-item-value" style="display:flex;align-items:center;gap:8px;">
-                    <input type="color" name="color" value="#ff0000" id="colorInput1"
-                        style="width:40px;height:26px;padding:0;border:1px solid #555;border-radius:3px;cursor:pointer;">
-                    <span id="colorHex1" style="font-family:monospace;color:#d8d8d8;font-size:10px;">#ff0000</span>
-                </div>
-            </div>
-            <div class="sdpi-item" id="color-secondary" type="color" style="display:none;">
-                <div class="sdpi-item-label">Color 2</div>
-                <div class="sdpi-item-value" style="display:flex;align-items:center;gap:8px;">
-                    <input type="color" name="color2" value="#0000ff" id="colorInput2"
-                        style="width:40px;height:26px;padding:0;border:1px solid #555;border-radius:3px;cursor:pointer;">
-                    <span id="colorHex2" style="font-family:monospace;color:#d8d8d8;font-size:10px;">#0000ff</span>
-                </div>
-            </div>
-            <div class="sdpi-item" id="gradient-preview-container" style="display:none;">
-                <div class="sdpi-item-label">Preview</div>
-                <div class="sdpi-item-value">
-                    <div id="gradientPreview"
-                        style="height:20px;border-radius:4px;border:1px solid #555;margin-right:14px;"></div>
-                </div>
+    <!-- Back Color Cycle: 6 configurable solid color presets -->
+    <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.back.color">
+        <form id="color-cycle-form">
+            <div class="sdpi-heading">Color Presets (click to edit)</div>
+            <div id="colorPresetsList" style="margin: 0 14px 10px 14px;">
+                <!-- Color presets will be rendered here -->
             </div>
         </form>
     </div>
 
+    <!-- Back Gradient Cycle: gradient presets -->
     <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.back.presets">
         <form id="presets-form">
-            <div class="sdpi-heading">Add New Preset</div>
-            <div class="sdpi-item">
-                <div class="sdpi-item-label">Mode</div>
-                <div class="sdpi-item-value">
-                    <select id="presetMode">
-                        <option value="solid">Solid</option>
-                        <option value="gradient">Gradient</option>
-                    </select>
-                </div>
-            </div>
+            <div class="sdpi-heading">Add New Gradient</div>
             <div class="sdpi-item" type="color">
                 <div class="sdpi-item-label">Colors</div>
                 <div class="sdpi-item-value" style="display:flex;align-items:center;gap:8px;">
-                    <input type="color" id="presetColor1" value="#ff0000" style="width:30px;height:26px;">
-                    <input type="color" id="presetColor2" value="#0000ff" style="width:30px;height:26px;display:none;">
+                    <input type="color" id="presetColor1" value="#ff00ff" style="width:30px;height:26px;">
+                    <input type="color" id="presetColor2" value="#00ffff" style="width:30px;height:26px;">
+                    <div id="gradientAddPreview"
+                        style="flex:1;height:20px;border-radius:4px;border:1px solid #555;margin-right:4px;"></div>
                     <button class="sdpi-item-value" id="addPresetBtn" style="height:26px;margin:0;">Add</button>
                 </div>
             </div>
 
-            <div class="sdpi-heading">Your Presets</div>
+            <div class="sdpi-heading">Your Gradients</div>
             <div id="presetsList" style="margin: 0 14px 10px 14px; max-height: 200px; overflow-y: auto;">
                 <!-- Presets will be listed here -->
             </div>
@@ -148,54 +115,107 @@
 
     const handleTemperatureChange = (event) => {
         const kelvin = event.currentTarget.value
-
-        console.log("KELVIN", kelvin)
-
         const { r, g, b } = getRGBFromTemperature(kelvin)
-
-        console.log("rgb", r, g, b)
-
-        console.log("event.currentTarget", event.currentTarget)
-
         event.currentTarget.style.accentColor = `rgb(${r}, ${g}, ${b})`
     }
 
     const handleBrightnessChange = (event) => {
-        // const v = parseInt(event.currentTarget.value) * 255 / 100
-
         let v = parseInt(event.currentTarget.value) * 0.8 + 20
         v = clamp(v, 20, 100)
-
-
         event.currentTarget.style.accentColor = `hsl(0, 0%, ${v}%)`
     }
 
-    const handleColorChange = () => {
-        const mode = document.getElementById('colorMode').value;
-        const color1 = document.getElementById('colorInput1').value;
-        const color2 = document.getElementById('colorInput2').value;
+    // ===== Back Color Cycle: 6 preset solid colors =====
 
-        document.getElementById('colorHex1').innerText = color1.toUpperCase();
-        document.getElementById('colorHex2').innerText = color2.toUpperCase();
+    const defaultColorPresets = ['#FF0000', '#00FF00', '#0000FF', '#FF00FF', '#FFFF00', '#00FFFF'];
+    let colorPresets = [...defaultColorPresets];
 
-        const secondaryItem = document.getElementById('color-secondary');
-        const previewItem = document.getElementById('gradient-preview-container');
-
-        if (mode === 'gradient') {
-            secondaryItem.style.display = 'flex';
-            previewItem.style.display = 'flex';
-            document.getElementById('gradientPreview').style.background = `linear-gradient(to right, ${color1}, ${color2})`;
-        } else {
-            secondaryItem.style.display = 'none';
-            previewItem.style.display = 'none';
+    const updateColorPresetsUI = (presets) => {
+        colorPresets = presets || [...defaultColorPresets];
+        // Pad to 6 if fewer
+        while (colorPresets.length < 6) {
+            colorPresets.push('#FFFFFF');
         }
+        // Limit to 6
+        colorPresets = colorPresets.slice(0, 6);
+
+        const list = document.getElementById('colorPresetsList');
+        if (!list) return;
+        list.innerHTML = '';
+
+        colorPresets.forEach((color, i) => {
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+            row.style.marginBottom = '4px';
+            row.style.background = '#333';
+            row.style.padding = '4px 8px';
+            row.style.borderRadius = '4px';
+
+            const label = document.createElement('span');
+            label.innerText = `${i + 1}.`;
+            label.style.fontSize = '11px';
+            label.style.marginRight = '8px';
+            label.style.color = '#aaa';
+            label.style.width = '16px';
+
+            const swatch = document.createElement('div');
+            swatch.style.width = '28px';
+            swatch.style.height = '18px';
+            swatch.style.borderRadius = '3px';
+            swatch.style.border = '1px solid #666';
+            swatch.style.background = color;
+            swatch.style.marginRight = '8px';
+
+            const input = document.createElement('input');
+            input.type = 'color';
+            input.value = color;
+            input.style.width = '30px';
+            input.style.height = '22px';
+            input.style.padding = '0';
+            input.style.border = '1px solid #555';
+            input.style.borderRadius = '3px';
+            input.style.cursor = 'pointer';
+            input.onchange = (e) => {
+                colorPresets[i] = e.target.value;
+                swatch.style.background = e.target.value;
+                hex.innerText = e.target.value.toUpperCase();
+                $PI.setSettings({ colorPresets: colorPresets });
+            };
+
+            const hex = document.createElement('span');
+            hex.innerText = color.toUpperCase();
+            hex.style.fontFamily = 'monospace';
+            hex.style.fontSize = '10px';
+            hex.style.color = '#d8d8d8';
+            hex.style.marginLeft = '8px';
+            hex.style.flex = '1';
+
+            row.appendChild(label);
+            row.appendChild(swatch);
+            row.appendChild(input);
+            row.appendChild(hex);
+            list.appendChild(row);
+        });
     };
 
+    // ===== Back Gradient Cycle: gradient-only presets =====
+
     let currentPresets = [];
+
+    const updateGradientPreview = () => {
+        const c1 = document.getElementById('presetColor1');
+        const c2 = document.getElementById('presetColor2');
+        const preview = document.getElementById('gradientAddPreview');
+        if (c1 && c2 && preview) {
+            preview.style.background = `linear-gradient(to right, ${c1.value}, ${c2.value})`;
+        }
+    };
 
     const updatePresetsUI = (presets) => {
         currentPresets = presets || [];
         const list = document.getElementById('presetsList');
+        if (!list) return;
         list.innerHTML = '';
         currentPresets.forEach((p, i) => {
             const div = document.createElement('div');
@@ -207,20 +227,17 @@
             div.style.borderRadius = '4px';
 
             const preview = document.createElement('div');
-            preview.style.width = '40px';
+            preview.style.width = '50px';
             preview.style.height = '16px';
             preview.style.borderRadius = '2px';
             preview.style.marginRight = '8px';
-            if (p.mode === 'gradient') {
-                preview.style.background = `linear-gradient(to right, ${p.color}, ${p.color2})`;
-            } else {
-                preview.style.background = p.color;
-            }
+            preview.style.background = `linear-gradient(to right, ${p.color}, ${p.color2})`;
 
             const label = document.createElement('span');
-            label.innerText = p.mode === 'gradient' ? 'Grad' : 'Solid';
+            label.innerText = `${i + 1}`;
             label.style.fontSize = '10px';
             label.style.flex = '1';
+            label.style.color = '#aaa';
 
             const delBtn = document.createElement('button');
             delBtn.innerText = '×';
@@ -240,50 +257,51 @@
         });
     };
 
-    document.getElementById('presetMode').onchange = (e) => {
-        document.getElementById('presetColor2').style.display = e.target.value === 'gradient' ? 'inline-block' : 'none';
-    };
+    // Gradient preview live update
+    const presetColor1 = document.getElementById('presetColor1');
+    const presetColor2 = document.getElementById('presetColor2');
+    if (presetColor1) presetColor1.addEventListener('input', updateGradientPreview);
+    if (presetColor2) presetColor2.addEventListener('input', updateGradientPreview);
 
-    document.getElementById('addPresetBtn').onclick = (e) => {
-        e.preventDefault();
-        const mode = document.getElementById('presetMode').value;
-        const color = document.getElementById('presetColor1').value;
-        const color2 = document.getElementById('presetColor2').value;
-
-        currentPresets.push({ mode, color, color2 });
-        $PI.setSettings({ presets: currentPresets });
-        updatePresetsUI(currentPresets);
-    };
+    const addPresetBtn = document.getElementById('addPresetBtn');
+    if (addPresetBtn) {
+        addPresetBtn.onclick = (e) => {
+            e.preventDefault();
+            const color = document.getElementById('presetColor1').value;
+            const color2 = document.getElementById('presetColor2').value;
+            currentPresets.push({ mode: 'gradient', color, color2 });
+            $PI.setSettings({ presets: currentPresets });
+            updatePresetsUI(currentPresets);
+        };
+    }
 
     $PI.onDidReceiveSettings(({ payload }) => {
         if (payload.settings.presets) {
             updatePresetsUI(payload.settings.presets);
         }
+        if (payload.settings.colorPresets) {
+            updateColorPresetsUI(payload.settings.colorPresets);
+        }
     });
 
-    // We also need to catch the initial settings from onConnected
-    // Since pi.js might have already run, we can check if settings are available
-    // A better way is to hook into the onConnected in a way that doesn't conflict
-    // for now let's just let it be handled by onDidReceiveSettings which usually triggers
-
     let temperatureInput = document.querySelector('#temperature input');
-    temperatureInput.addEventListener("change", handleTemperatureChange);
-    temperatureInput.addEventListener("input", handleTemperatureChange);
+    if (temperatureInput) {
+        temperatureInput.addEventListener("change", handleTemperatureChange);
+        temperatureInput.addEventListener("input", handleTemperatureChange);
+    }
     let brightnessInput = document.querySelector('#brightness input');
-    brightnessInput.addEventListener("change", handleBrightnessChange);
-    brightnessInput.addEventListener("input", handleBrightnessChange);
-
-    document.getElementById('colorMode').addEventListener('change', handleColorChange);
-    document.getElementById('colorInput1').addEventListener('input', handleColorChange);
-    document.getElementById('colorInput2').addEventListener('input', handleColorChange);
+    if (brightnessInput) {
+        brightnessInput.addEventListener("change", handleBrightnessChange);
+        brightnessInput.addEventListener("input", handleBrightnessChange);
+    }
 
     (() => {
         let temperatureInput = document.querySelector('#temperature input');
         let brightnessInput = document.querySelector('#brightness input');
 
-        handleTemperatureChange({ currentTarget: temperatureInput });
-        handleBrightnessChange({ currentTarget: brightnessInput });
-        handleColorChange();
+        if (temperatureInput) handleTemperatureChange({ currentTarget: temperatureInput });
+        if (brightnessInput) handleBrightnessChange({ currentTarget: brightnessInput });
+        updateGradientPreview();
     })();
 </script>
 

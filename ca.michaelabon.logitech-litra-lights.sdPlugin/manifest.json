@@ -106,48 +106,33 @@
 			"UUID": "ca.michaelabon.logitech-litra-lights.back.brightness"
 		},
 		{
-			"Icon": "icons/litra_back_cycle",
+			"Icon": "icons/litra_back_solid",
 			"Name": "Back Color Cycle",
 			"States": [
 				{
-					"Image": "icons/litra_back_cycle",
+					"Image": "icons/litra_back_solid",
 					"TitleAlignment": "middle",
 					"Title": "Color",
 					"FontSize": 18
 				}
 			],
 			"SupportedInMultiActions": true,
-			"Tooltip": "Cycle back light color",
+			"Tooltip": "Cycle through 6 configurable solid back light colors",
 			"UUID": "ca.michaelabon.logitech-litra-lights.back.color"
 		},
 		{
-			"Icon": "icons/litra_back",
-			"Name": "Back Color Picker",
-			"States": [
-				{
-					"Image": "icons/litra_back",
-					"TitleAlignment": "middle",
-					"Title": "Set",
-					"FontSize": 18
-				}
-			],
-			"SupportedInMultiActions": true,
-			"Tooltip": "Set back light to a specific color",
-			"UUID": "ca.michaelabon.logitech-litra-lights.back.colorpicker"
-		},
-		{
 			"Icon": "icons/litra_preset_cycle",
-			"Name": "Back Preset Cycle",
+			"Name": "Back Gradient Cycle",
 			"States": [
 				{
 					"Image": "icons/litra_preset_cycle",
 					"TitleAlignment": "middle",
-					"Title": "Presets",
+					"Title": "Gradient",
 					"FontSize": 18
 				}
 			],
 			"SupportedInMultiActions": true,
-			"Tooltip": "Cycle through your saved color/gradient presets",
+			"Tooltip": "Cycle through your saved gradient presets",
 			"UUID": "ca.michaelabon.logitech-litra-lights.back.presets"
 		}
 	],

@@ -1,0 +1,16 @@
+<svg width="144" height="144" viewBox="0 0 144 144" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="144" height="144" fill="#121212"/>
+  <defs>
+    <filter id="premiumGlow" x="-20%" y="-100%" width="140%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <!-- Light Bar - Solid Red -->
+  <rect x="20" y="85" width="104" height="16" rx="8" fill="#FF2222" filter="url(#premiumGlow)"/>
+  <!-- Solid Color Circle Above -->
+  <g transform="translate(0, -5)">
+    <circle cx="72" cy="44" r="16" fill="#FF2222" stroke="white" stroke-width="2"/>
+    <circle cx="72" cy="44" r="6" fill="white" opacity="0.4"/>
+  </g>
+</svg>

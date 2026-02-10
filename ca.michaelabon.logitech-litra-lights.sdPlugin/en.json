@@ -3,7 +3,7 @@
 	"Name": "Logitech Litra",
 	"ca.michaelabon.logitech-litra-lights.set.action": {
 		"Name": "Set Brightness & Temperature",
-		"Tooltip": "Set your lights’ brightness and temperature"
+		"Tooltip": "Set your lights' brightness and temperature"
 	},
 	"ca.michaelabon.logitech-litra-lights.off.action": {
 		"Name": "Turn Off All Lights",
@@ -31,11 +31,11 @@
 	},
 	"ca.michaelabon.logitech-litra-lights.back.color.action": {
 		"Name": "Back Color Cycle",
-		"Tooltip": "Cycle back light RGB color"
+		"Tooltip": "Cycle through 6 configurable solid back light colors"
 	},
-	"ca.michaelabon.logitech-litra-lights.back.colorpicker.action": {
-		"Name": "Back Color Picker",
-		"Tooltip": "Set back light to a specific RGB color"
+	"ca.michaelabon.logitech-litra-lights.back.presets.action": {
+		"Name": "Back Gradient Cycle",
+		"Tooltip": "Cycle through your saved gradient presets"
 	},
 	"Localization": {}
 }
