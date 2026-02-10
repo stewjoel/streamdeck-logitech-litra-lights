@@ -1,45 +1,54 @@
-# Elgato Stream Deck – Logitech Litra Lights
+# Elgato Stream Deck – Logitech Litra Beam LX
 
-A plugin for the Elgato Stream Deck that allow for control over your Logitech Litra Glow lights.
+A premium Stream Deck plugin for controlling Logitech Litra lights, specifically optimized for the **Litra Beam LX**.
 
-## How to use it
+![Litra Beam LX](ca.michaelabon.logitech-litra-lights.sdPlugin/icons/pluginIcon.svg)
 
-Until I submit this plugin to the Elgato Marketplace, you must install it and build it manually.
+## Features & LX Optimizations
+- **Full Litra Beam LX Support**: Optimized for the dual-light bar architecture.
+- **Separate Front & Back Control**: Independently toggle, dim, and adjust temperature.
+- **RGB Backlight Gradients**: Create smooth 2-color gradients across the 7 back-light zones.
+- **Custom Presets**: Save your favorite colors and gradients into a library and cycle through them with a single button.
+- **Premium UI**: Modern, high-contrast SVG icons tailored for Stream Deck OLED keys.
+- **Auto Power Off**: Automatically turns off all lights when the Stream Deck application quits.
 
-You will need [Go](https://go.dev/dl/) to build this locally.
-The file `go.mod` contains the minimum version of go required.
+## Installation
 
-1. Clone the repository onto your Windows or macOS computer.
-2. Install [just](https://github.com/casey/just) if you don't have it already.
-   (`just` is an alternative to `make`).
-3. Run `just install build link`, to both build the plugin and create a symlink in your Elgato Plugins directory.
-4. Restart the Elgato Stream Deck application on your computer.
-5. In the Elgato Stream Deck application, on the right-hand side:
-   1. Find the new *Logitech Litra* category.
-   2. Drag-and-drop the *Set Brightness & Temperature* or *Turn Off Litra Lights* actions into your Stream Deck grid.
+Until this is listed on the Elgato Marketplace, you can build it manually:
+
+1. **System Requirements**: 
+   - [Go](https://go.dev/dl/) (check `go.mod` for version).
+   - [just](https://github.com/casey/just) command runner.
+2. **Build & Link**:
+   - Clone this repository.
+   - Run `just build link`.
+3. **Restart**: Restart your Stream Deck application.
+4. **Configure**: Drag the new "Logitech Litra" actions onto your keys and use the Property Inspector to set colors and presets.
+
+## How to Create a New Release
+
+To create an official release for GitHub:
+
+1. **Tag the Commit**: Mark the state of the code with a version tag.
+   ```powershell
+   git tag -a v2.1.0 -m "Release version 2.1.0"
+   ```
+2. **Push Up**: Send the tags to GitHub.
+   ```powershell
+   git push origin main --tags
+   ```
+3. **Draft on GitHub**:
+   - Go to your repository on GitHub.com.
+   - Click on **Releases** > **Draft a new release**.
+   - Select the tag you just pushed.
+   - Add a title and description (you can copy from `CHANGELOG.md`).
+   - Click **Publish release**.
 
 ## How do I contribute?
 
-Pull requests are welcome.
-For major changes, please open an issue first to discuss what you would like to change.
-
-I have split the codebase into its two parts:
-
-1. the actual Go code in `go/`
-2. plugin-specific files are in `ca.michaelabon.logitechlitra.sdPlugin/`
-
-Debugging is largely logfile based.
-The plugin will write to the `ca.michaelabon.logitechlitra.sdPlugin/logs/` directory.
-
-The [Stream Deck SDK](https://docs.elgato.com/sdk/) has documentation on how plugins work.
-In short, the plugin and the configuration page (known as the property inspector) communicate with the Stream Deck over websockets.
-They send and receive events.
-The SDK documentation and building a Stream Deck plugin in general is far from the best developer experience.
-If you have any questions about building a Stream Deck plugin, just open an issue in this repo.
-I'll do my best to help.
-
-Please make sure to update tests as appropriate.
-You can run tests with `just test`.
+Pull requests are welcome! I have split the codebase into two parts:
+1. `go/`: The Go backend for HID communication.
+2. `ca.michaelabon.logitechlitra.sdPlugin/`: PI (UI) files and manifest.
 
 ## License
 
