@@ -3,14 +3,26 @@
 /// <reference path="../libs/js/utils.js" />
 
 $PI.onConnected((jsn) => {
-    const { actionInfo, appInfo, connection, messageType, port, uuid } = jsn;
-    const { payload, context } = actionInfo;
+    const { actionInfo } = jsn;
+    const { payload } = actionInfo;
     const { settings } = payload;
 
+    window.currentActionSettings = Object.assign({}, settings || {});
+
+    if (typeof renderMultiDeviceUI === 'function') {
+        renderMultiDeviceUI(window.currentActionSettings);
+    }
+
     if (actionInfo && actionInfo.action) {
-        const section = document.getElementById(actionInfo.action)
+        // Hide target selector on the Sync Mode toggle key itself (it manages the pair group directly)
+        const targetRow = document.getElementById('target-selector-row');
+        if (targetRow) {
+            targetRow.style.display = (actionInfo.action === 'com.stewjoel.logitech-litra-lights.sync') ? 'none' : 'flex';
+        }
+
+        const section = document.getElementById(actionInfo.action);
         if (section) {
-            section.style.display = "block"
+            section.style.display = "block";
             const form = section.querySelector('form');
             if (form) {
                 Utils.setFormValue(settings, form);
@@ -18,38 +30,28 @@ $PI.onConnected((jsn) => {
                     'input',
                     Utils.debounce(150, () => {
                         const value = Utils.getFormValue(form);
-                        $PI.setSettings(value);
+                        saveMergedSettings(value);
                     })
                 );
             }
-            // Back Gradient Cycle: load gradient presets
-            if (actionInfo.action === 'ca.michaelabon.logitech-litra-lights.back.presets') {
-                if (settings.presets && typeof updatePresetsUI === 'function') {
+            if (actionInfo.action === 'com.stewjoel.logitech-litra-lights.back.presets') {
+                if (typeof updatePresetsUI === 'function') {
                     updatePresetsUI(settings.presets);
                 }
             }
-            // Back Color Cycle: load color presets
-            if (actionInfo.action === 'ca.michaelabon.logitech-litra-lights.back.color') {
+            if (actionInfo.action === 'com.stewjoel.logitech-litra-lights.back.color') {
                 if (typeof updateColorPresetsUI === 'function') {
                     updateColorPresetsUI(settings.colorPresets);
                 }
             }
         }
     }
-
-    window.onGetSettingsClick = (url) => {
-        $PI.send(this.UUID, "openUrl", { payload: { url } })
-    }
 });
 
 $PI.onDidReceiveGlobalSettings(({ payload }) => {
     console.log('onDidReceiveGlobalSettings', payload);
-})
+});
 
-/**
- * Provide window level functions to use in the external window
- * (this can be removed if the external window is not used)
- */
 window.sendToInspector = (data) => {
     console.log(data);
 };

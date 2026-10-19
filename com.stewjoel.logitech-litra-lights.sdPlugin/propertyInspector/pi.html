@@ -17,15 +17,52 @@
         .sdpi-wrapper {
             display: none;
         }
+
+        .device-pair-row {
+            display: flex;
+            align-items: center;
+            background: #2d2d2d;
+            padding: 5px 8px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: #ddd;
+        }
+
+        .device-pair-row input[type="checkbox"] {
+            margin-right: 8px;
+        }
     </style>
 
-
-    <title>ca.michaelabon.logitechlitra Property Inspector</title>
+    <title>com.stewjoel.logitech-litra-lights Property Inspector</title>
 </head>
 
 <body>
-    <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.set">
+    <!-- Universal Multi-Light Target & Pairing Selector (visible on all actions) -->
+    <div id="multi-device-panel" style="display:block;">
+        <div class="sdpi-heading">Light Target & Pairing</div>
+        <div class="sdpi-item" id="target-selector-row">
+            <div class="sdpi-item-label">Target</div>
+            <select class="sdpi-item-value select" id="deviceTargetSelect">
+                <option value="synced">All Paired / Synced Lights</option>
+                <option value="all">All Connected Lights</option>
+                <option value="index:0">Light #1 Only</option>
+                <option value="index:1">Light #2 Only</option>
+            </select>
+        </div>
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">Paired Lights</div>
+            <div class="sdpi-item-value" id="pairedDevicesContainer" style="display:flex;flex-direction:column;">
+                <span style="font-size:11px;color:#888;">Searching for Litra lights...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Set Brightness & Temperature -->
+    <div class="sdpi-wrapper" id="com.stewjoel.logitech-litra-lights.set">
         <form id="property-inspector">
+            <div class="sdpi-heading">Light Settings</div>
             <div type="range" class="sdpi-item" id="temperature">
                 <div class="sdpi-item-label">Temperature</div>
                 <div class="sdpi-item-value">
@@ -47,17 +84,15 @@
     </div>
 
     <!-- Back Color Cycle: 6 configurable solid color presets -->
-    <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.back.color">
+    <div class="sdpi-wrapper" id="com.stewjoel.logitech-litra-lights.back.color">
         <form id="color-cycle-form">
             <div class="sdpi-heading">Color Presets (click to edit)</div>
-            <div id="colorPresetsList" style="margin: 0 14px 10px 14px;">
-                <!-- Color presets will be rendered here -->
-            </div>
+            <div id="colorPresetsList" style="margin: 0 14px 10px 14px;"></div>
         </form>
     </div>
 
     <!-- Back Gradient Cycle: gradient presets -->
-    <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.back.presets">
+    <div class="sdpi-wrapper" id="com.stewjoel.logitech-litra-lights.back.presets">
         <form id="presets-form">
             <div class="sdpi-heading">Add New Gradient</div>
             <div class="sdpi-item" type="color">
@@ -72,15 +107,23 @@
             </div>
 
             <div class="sdpi-heading">Your Gradients</div>
-            <div id="presetsList" style="margin: 0 14px 10px 14px; max-height: 200px; overflow-y: auto;">
-                <!-- Presets will be listed here -->
-            </div>
+            <div id="presetsList" style="margin: 0 14px 10px 14px; max-height: 200px; overflow-y: auto;"></div>
         </form>
     </div>
 
-    <div class="sdpi-wrapper" id="ca.michaelabon.logitech-litra-lights.off">
-
+    <div class="sdpi-wrapper" id="com.stewjoel.logitech-litra-lights.sync">
+        <div class="sdpi-heading">Sync Key Behavior</div>
+        <div style="margin: 0 16px 10px 16px; font-size: 11px; color: #aaa; line-height: 1.4;">
+            Pressing this key on the Stream Deck cycles between <b>SYNC ALL</b> (controls all checked lights simultaneously), <b>SOLO #1</b>, and <b>SOLO #2</b>.
+        </div>
     </div>
+
+    <div class="sdpi-wrapper" id="com.stewjoel.logitech-litra-lights.off"></div>
+    <div class="sdpi-wrapper" id="com.stewjoel.logitech-litra-lights.front.power"></div>
+    <div class="sdpi-wrapper" id="com.stewjoel.logitech-litra-lights.back.power"></div>
+    <div class="sdpi-wrapper" id="com.stewjoel.logitech-litra-lights.front.temperature"></div>
+    <div class="sdpi-wrapper" id="com.stewjoel.logitech-litra-lights.front.brightness"></div>
+    <div class="sdpi-wrapper" id="com.stewjoel.logitech-litra-lights.back.brightness"></div>
 </body>
 
 <script src="./libs/js/constants.js"></script>
@@ -91,52 +134,113 @@
 <script src="pi.js"></script>
 
 <script>
+    window.currentActionSettings = window.currentActionSettings || {};
+
+    const saveMergedSettings = (partial) => {
+        window.currentActionSettings = Object.assign({}, window.currentActionSettings, partial);
+        $PI.setSettings(window.currentActionSettings);
+    };
+
     const clamp = (num, min, max) => num < min ? min : num > max ? max : num;
 
     const getRGBFromTemperature = (tmpKelvin) => {
-        // All calculations require tmpKelvin \ 100, so only do the conversion once
         tmpKelvin = clamp(tmpKelvin, 1000, 40000) / 100;
-
-        // Note: The R-squared values for each approximation follow each calculation
         return {
             r: tmpKelvin <= 66 ? 255 :
-                clamp(329.698727446 * (Math.pow(tmpKelvin - 60, -0.1332047592)), 0, 255),  // .988
-
+                clamp(329.698727446 * (Math.pow(tmpKelvin - 60, -0.1332047592)), 0, 255),
             g: tmpKelvin <= 66 ?
-                clamp(99.4708025861 * Math.log(tmpKelvin) - 161.1195681661, 0, 255) :      // .996
-                clamp(288.1221695283 * (Math.pow(tmpKelvin - 60, -0.0755148492)), 0, 255), // .987
-
+                clamp(99.4708025861 * Math.log(tmpKelvin) - 161.1195681661, 0, 255) :
+                clamp(288.1221695283 * (Math.pow(tmpKelvin - 60, -0.0755148492)), 0, 255),
             b: tmpKelvin >= 66 ? 255 :
                 tmpKelvin <= 19 ? 0 :
-                    clamp(138.5177312231 * Math.log(tmpKelvin - 10) - 305.0447927307, 0, 255)  // .998
+                    clamp(138.5177312231 * Math.log(tmpKelvin - 10) - 305.0447927307, 0, 255)
         };
     };
 
-
     const handleTemperatureChange = (event) => {
-        const kelvin = event.currentTarget.value
-        const { r, g, b } = getRGBFromTemperature(kelvin)
-        event.currentTarget.style.accentColor = `rgb(${r}, ${g}, ${b})`
-    }
+        const kelvin = event.currentTarget.value;
+        const { r, g, b } = getRGBFromTemperature(kelvin);
+        event.currentTarget.style.accentColor = `rgb(${r}, ${g}, ${b})`;
+    };
 
     const handleBrightnessChange = (event) => {
-        let v = parseInt(event.currentTarget.value) * 0.8 + 20
-        v = clamp(v, 20, 100)
-        event.currentTarget.style.accentColor = `hsl(0, 0%, ${v}%)`
-    }
+        let v = parseInt(event.currentTarget.value) * 0.8 + 20;
+        v = clamp(v, 20, 100);
+        event.currentTarget.style.accentColor = `hsl(0, 0%, ${v}%)`;
+    };
+
+    // ===== Multi-Device Pairing & Target UI =====
+    const renderMultiDeviceUI = (settings) => {
+        const selectEl = document.getElementById('deviceTargetSelect');
+        const container = document.getElementById('pairedDevicesContainer');
+        const devices = settings.connectedDevices || [];
+
+        if (selectEl) {
+            const baseOptions = [
+                { value: 'synced', label: 'All Paired / Synced Lights' },
+                { value: 'all', label: 'All Connected Lights' },
+                { value: 'index:0', label: 'Light #1 Only' },
+                { value: 'index:1', label: 'Light #2 Only' }
+            ];
+            selectEl.innerHTML = '';
+            baseOptions.forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt.value;
+                o.textContent = opt.label;
+                selectEl.appendChild(o);
+            });
+            devices.forEach(d => {
+                const o = document.createElement('option');
+                o.value = d.id;
+                o.textContent = `Specific: ${d.name}`;
+                selectEl.appendChild(o);
+            });
+            selectEl.value = settings.deviceTarget || 'synced';
+            selectEl.onchange = (e) => {
+                saveMergedSettings({ deviceTarget: e.target.value });
+            };
+        }
+
+        if (container) {
+            container.innerHTML = '';
+            if (devices.length === 0) {
+                container.innerHTML = '<span style="font-size:11px;color:#888;">No Litra lights detected</span>';
+                return;
+            }
+
+            devices.forEach((dev) => {
+                const row = document.createElement('label');
+                row.className = 'device-pair-row';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = dev.paired !== false;
+                cb.dataset.deviceId = dev.id;
+                cb.onchange = () => {
+                    const checkedIds = Array.from(container.querySelectorAll('input[type="checkbox"]:checked'))
+                        .map(el => el.dataset.deviceId);
+                    saveMergedSettings({ pairedIds: checkedIds });
+                };
+
+                const text = document.createElement('span');
+                text.textContent = dev.name;
+
+                row.appendChild(cb);
+                row.appendChild(text);
+                container.appendChild(row);
+            });
+        }
+    };
 
     // ===== Back Color Cycle: 6 preset solid colors =====
-
     const defaultColorPresets = ['#FF0000', '#00FF00', '#0000FF', '#FF00FF', '#FFFF00', '#00FFFF'];
     let colorPresets = [...defaultColorPresets];
 
     const updateColorPresetsUI = (presets) => {
-        colorPresets = presets || [...defaultColorPresets];
-        // Pad to 6 if fewer
+        colorPresets = presets ? [...presets] : [...defaultColorPresets];
         while (colorPresets.length < 6) {
             colorPresets.push('#FFFFFF');
         }
-        // Limit to 6
         colorPresets = colorPresets.slice(0, 6);
 
         const list = document.getElementById('colorPresetsList');
@@ -180,7 +284,7 @@
                 colorPresets[i] = e.target.value;
                 swatch.style.background = e.target.value;
                 hex.innerText = e.target.value.toUpperCase();
-                $PI.setSettings({ colorPresets: colorPresets });
+                saveMergedSettings({ colorPresets: colorPresets });
             };
 
             const hex = document.createElement('span');
@@ -200,7 +304,6 @@
     };
 
     // ===== Back Gradient Cycle: gradient-only presets =====
-
     let currentPresets = [];
 
     const updateGradientPreview = () => {
@@ -246,7 +349,7 @@
             delBtn.style.minHeight = '20px';
             delBtn.onclick = () => {
                 currentPresets.splice(i, 1);
-                $PI.setSettings({ presets: currentPresets });
+                saveMergedSettings({ presets: currentPresets });
                 updatePresetsUI(currentPresets);
             };
 
@@ -257,7 +360,6 @@
         });
     };
 
-    // Gradient preview live update
     const presetColor1 = document.getElementById('presetColor1');
     const presetColor2 = document.getElementById('presetColor2');
     if (presetColor1) presetColor1.addEventListener('input', updateGradientPreview);
@@ -270,12 +372,14 @@
             const color = document.getElementById('presetColor1').value;
             const color2 = document.getElementById('presetColor2').value;
             currentPresets.push({ mode: 'gradient', color, color2 });
-            $PI.setSettings({ presets: currentPresets });
+            saveMergedSettings({ presets: currentPresets });
             updatePresetsUI(currentPresets);
         };
     }
 
     $PI.onDidReceiveSettings(({ payload }) => {
+        window.currentActionSettings = Object.assign({}, window.currentActionSettings, payload.settings || {});
+        renderMultiDeviceUI(window.currentActionSettings);
         if (payload.settings.presets) {
             updatePresetsUI(payload.settings.presets);
         }
@@ -296,9 +400,6 @@
     }
 
     (() => {
-        let temperatureInput = document.querySelector('#temperature input');
-        let brightnessInput = document.querySelector('#brightness input');
-
         if (temperatureInput) handleTemperatureChange({ currentTarget: temperatureInput });
         if (brightnessInput) handleBrightnessChange({ currentTarget: brightnessInput });
         updateGradientPreview();

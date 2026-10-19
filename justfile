@@ -1,5 +1,5 @@
 # Not a UUID, I know. Blame Elgato.
-UUID := "ca.michaelabon.logitech-litra-lights"
+UUID := "com.stewjoel.logitech-litra-lights"
 
 GO := "go"
 GOFLAGS := ""
@@ -135,8 +135,9 @@ link:
 
 [windows]
 link:
-    if (Test-Path "$env:APPDATA\Elgato\StreamDeck\Plugins\{{ PLUGIN }}") { Remove-Item -Recurse -Force "$env:APPDATA\Elgato\StreamDeck\Plugins\{{ PLUGIN }}" }
-    Copy-Item -Recurse -Force "{{ PLUGIN }}" "$env:APPDATA\Elgato\StreamDeck\Plugins\{{ PLUGIN }}"
+    Stop-Process -Name "streamdeck-logitech-litra-lights" -Force -ErrorAction SilentlyContinue
+    if (!(Test-Path "$env:APPDATA\Elgato\StreamDeck\Plugins\{{ PLUGIN }}")) { New-Item -ItemType Directory -Force -Path "$env:APPDATA\Elgato\StreamDeck\Plugins\{{ PLUGIN }}" }
+    Copy-Item -Recurse -Force "{{ PLUGIN }}\*" "$env:APPDATA\Elgato\StreamDeck\Plugins\{{ PLUGIN }}\" -Exclude "logs"
 
 [macos]
 unlink:
@@ -185,7 +186,7 @@ restart: start
 
 
 validate:
-    cd "{{ PLUGIN }}" && npx streamdeck validate
+    cd "{{ PLUGIN }}"; npx streamdeck validate
 
 ## Package the plugin for distribution to Elgato
 package: build

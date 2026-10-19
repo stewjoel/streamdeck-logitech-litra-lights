@@ -13,7 +13,7 @@ This document contains information for developers and maintainers of the Stream 
 Pull requests are welcome! The codebase is split into two main parts:
 
 1. `go/`: The Go backend for HID communication.
-2. `ca.michaelabon.logitech-litra-lights.sdPlugin/`: Property Inspector (UI) files and manifest.
+2. `com.stewjoel.logitech-litra-lights.sdPlugin/`: Property Inspector (UI) files and manifest.
 
 ## Building and Testing
 

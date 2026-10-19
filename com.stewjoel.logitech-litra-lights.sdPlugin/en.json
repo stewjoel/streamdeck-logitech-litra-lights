@@ -1,41 +1,45 @@
 {
 	"Description": "Control your Logitech Litra lights",
 	"Name": "Logitech Litra",
-	"ca.michaelabon.logitech-litra-lights.set.action": {
+	"com.stewjoel.logitech-litra-lights.set.action": {
 		"Name": "Set Brightness & Temperature",
 		"Tooltip": "Set your lights' brightness and temperature"
 	},
-	"ca.michaelabon.logitech-litra-lights.off.action": {
+	"com.stewjoel.logitech-litra-lights.off.action": {
 		"Name": "Turn Off All Lights",
 		"Tooltip": "Turn off both front and back lights"
 	},
-	"ca.michaelabon.logitech-litra-lights.front.power.action": {
+	"com.stewjoel.logitech-litra-lights.front.power.action": {
 		"Name": "Front Light Power",
 		"Tooltip": "Toggle the front light"
 	},
-	"ca.michaelabon.logitech-litra-lights.back.power.action": {
+	"com.stewjoel.logitech-litra-lights.back.power.action": {
 		"Name": "Back Light Power",
 		"Tooltip": "Toggle the back light"
 	},
-	"ca.michaelabon.logitech-litra-lights.front.temperature.action": {
+	"com.stewjoel.logitech-litra-lights.front.temperature.action": {
 		"Name": "Front Temp Cycle",
 		"Tooltip": "Cycle front light temperature"
 	},
-	"ca.michaelabon.logitech-litra-lights.front.brightness.action": {
+	"com.stewjoel.logitech-litra-lights.front.brightness.action": {
 		"Name": "Front Brightness Cycle",
 		"Tooltip": "Cycle front light brightness"
 	},
-	"ca.michaelabon.logitech-litra-lights.back.brightness.action": {
+	"com.stewjoel.logitech-litra-lights.back.brightness.action": {
 		"Name": "Back Brightness Cycle",
 		"Tooltip": "Cycle back light brightness"
 	},
-	"ca.michaelabon.logitech-litra-lights.back.color.action": {
+	"com.stewjoel.logitech-litra-lights.back.color.action": {
 		"Name": "Back Color Cycle",
 		"Tooltip": "Cycle through 6 configurable solid back light colors"
 	},
-	"ca.michaelabon.logitech-litra-lights.back.presets.action": {
+	"com.stewjoel.logitech-litra-lights.back.presets.action": {
 		"Name": "Back Gradient Cycle",
 		"Tooltip": "Cycle through your saved gradient presets"
+	},
+	"com.stewjoel.logitech-litra-lights.sync.action": {
+		"Name": "Pair & Sync Lights",
+		"Tooltip": "Pair two or more Litra lights together and toggle between Synced and Solo control"
 	},
 	"Localization": {}
 }

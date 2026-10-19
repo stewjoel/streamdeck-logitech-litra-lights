@@ -345,13 +345,16 @@ build/*
 TODO.txt
 .idea/cody_history.xml
 hidapi/
-ca.michaelabon.logitech-litra-lights.sdPlugin/hidapi.dll
-ca.michaelabon.logitech-litra-lights.sdPlugin/libhidapi.dylib
+com.stewjoel.logitech-litra-lights.sdPlugin/hidapi.dll
+com.stewjoel.logitech-litra-lights.sdPlugin/libhidapi.dylib
 
-# Generic binaries
+# Generic binaries & logs
 *.exe
 *.dll
 *.so
 *.dylib
 *.log
-!ca.michaelabon.logitech-litra-lights.sdPlugin/build/*.exe
+debug_log.txt
+*.streamDeckPlugin
+!com.stewjoel.logitech-litra-lights.sdPlugin/build/*.exe
+

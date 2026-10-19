@@ -1,0 +1,19 @@
+<svg width="144" height="144" viewBox="0 0 144 144" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="144" height="144" fill="#121212"/>
+  <defs>
+    <linearGradient id="syncGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00D2FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00F0FF;stop-opacity:1" />
+    </linearGradient>
+    <filter id="syncFilter" x="-20%" y="-100%" width="140%" height="300%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <!-- Two synced Light Bars -->
+  <rect x="24" y="32" width="16" height="80" rx="8" fill="url(#syncGlow)" filter="url(#syncFilter)"/>
+  <rect x="104" y="32" width="16" height="80" rx="8" fill="url(#syncGlow)" filter="url(#syncFilter)"/>
+  <!-- Sync / Link arrows in the middle -->
+  <path d="M58 58 C66 48 78 48 86 58 M86 58 L86 50 M86 58 L78 58" stroke="#00F0FF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M86 86 C78 96 66 96 58 86 M58 86 L58 94 M58 86 L66 86" stroke="#00F0FF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

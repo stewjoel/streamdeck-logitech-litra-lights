@@ -13,7 +13,7 @@
 			],
 			"SupportedInMultiActions": true,
 			"Tooltip": "Set your lights",
-			"UUID": "ca.michaelabon.logitech-litra-lights.set"
+			"UUID": "com.stewjoel.logitech-litra-lights.set"
 		},
 		{
 			"Icon": "icons/litra_off",
@@ -28,7 +28,7 @@
 			],
 			"SupportedInMultiActions": true,
 			"Tooltip": "Turn off both front and back lights",
-			"UUID": "ca.michaelabon.logitech-litra-lights.off"
+			"UUID": "com.stewjoel.logitech-litra-lights.off"
 		},
 		{
 			"Icon": "icons/litra_front_power",
@@ -43,7 +43,7 @@
 			],
 			"SupportedInMultiActions": true,
 			"Tooltip": "Turn the front light on",
-			"UUID": "ca.michaelabon.logitech-litra-lights.front.power"
+			"UUID": "com.stewjoel.logitech-litra-lights.front.power"
 		},
 		{
 			"Icon": "icons/litra_back_power",
@@ -58,7 +58,7 @@
 			],
 			"SupportedInMultiActions": true,
 			"Tooltip": "Turn the back light on",
-			"UUID": "ca.michaelabon.logitech-litra-lights.back.power"
+			"UUID": "com.stewjoel.logitech-litra-lights.back.power"
 		},
 		{
 			"Icon": "icons/litra_front",
@@ -73,7 +73,7 @@
 			],
 			"SupportedInMultiActions": true,
 			"Tooltip": "Cycle front light color temperature (2700K-6500K)",
-			"UUID": "ca.michaelabon.logitech-litra-lights.front.temperature"
+			"UUID": "com.stewjoel.logitech-litra-lights.front.temperature"
 		},
 		{
 			"Icon": "icons/litra_front_bright",
@@ -88,7 +88,7 @@
 			],
 			"SupportedInMultiActions": true,
 			"Tooltip": "Cycle front light brightness (20%-100%)",
-			"UUID": "ca.michaelabon.logitech-litra-lights.front.brightness"
+			"UUID": "com.stewjoel.logitech-litra-lights.front.brightness"
 		},
 		{
 			"Icon": "icons/litra_back_bright",
@@ -103,7 +103,7 @@
 			],
 			"SupportedInMultiActions": true,
 			"Tooltip": "Cycle back light brightness (20%-100%)",
-			"UUID": "ca.michaelabon.logitech-litra-lights.back.brightness"
+			"UUID": "com.stewjoel.logitech-litra-lights.back.brightness"
 		},
 		{
 			"Icon": "icons/litra_back_solid",
@@ -118,7 +118,7 @@
 			],
 			"SupportedInMultiActions": true,
 			"Tooltip": "Cycle through 6 configurable solid back light colors",
-			"UUID": "ca.michaelabon.logitech-litra-lights.back.color"
+			"UUID": "com.stewjoel.logitech-litra-lights.back.color"
 		},
 		{
 			"Icon": "icons/litra_preset_cycle",
@@ -133,15 +133,30 @@
 			],
 			"SupportedInMultiActions": true,
 			"Tooltip": "Cycle through your saved gradient presets",
-			"UUID": "ca.michaelabon.logitech-litra-lights.back.presets"
+			"UUID": "com.stewjoel.logitech-litra-lights.back.presets"
+		},
+		{
+			"Icon": "icons/litra_sync",
+			"Name": "Pair & Sync Lights",
+			"States": [
+				{
+					"Image": "icons/litra_sync",
+					"TitleAlignment": "middle",
+					"Title": "Sync",
+					"FontSize": 16
+				}
+			],
+			"SupportedInMultiActions": true,
+			"Tooltip": "Pair two or more Litra lights together and toggle between Synced and Solo control",
+			"UUID": "com.stewjoel.logitech-litra-lights.sync"
 		}
 	],
-	"Author": "Michael Abon",
+	"Author": "Joel Stewart",
 	"Category": "Logitech Litra",
 	"CategoryIcon": "icons/category_icon",
 	"CodePathMac": "build/streamdeck-logitech-litra-lights_arm64",
 	"CodePath": "build/streamdeck-logitech-litra-lights.exe",
-	"Description": "Control your Logitech Litra Beam LX lights directly from the Stream Deck.",
+	"Description": "Control and synchronize your Logitech Litra Glow, Litra Beam, and Litra Beam LX lights directly from the Stream Deck.",
 	"Icon": "icons/litra_back",
 	"Name": "Logitech Litra",
 	"OS": [
@@ -159,7 +174,7 @@
 	"Software": {
 		"MinimumVersion": "6.4"
 	},
-	"URL": "https://github.com/michaelabon/streamdeck-logitech-litra-lights",
-	"UUID": "ca.michaelabon.logitech-litra-lights",
+	"URL": "https://github.com/stewjoel/streamdeck-logitech-litra-lights",
+	"UUID": "com.stewjoel.logitech-litra-lights",
 	"Version": "2.1.0.0"
 }

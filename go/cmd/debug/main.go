@@ -13,8 +13,16 @@ import (
 
 const (
 	VID = 0x046d
-	PID = 0xc903
 )
+
+var litraPIDs = map[uint16]string{
+	0xc900: "Litra Glow (USB)",
+	0xb900: "Litra Glow (Bluetooth)",
+	0xc901: "Litra Beam (USB)",
+	0xb901: "Litra Beam (Bluetooth)",
+	0xc903: "Litra Beam LX (USB)",
+	0xb903: "Litra Beam LX (Bluetooth)",
+}
 
 func main() {
 	if err := hid.Init(); err != nil {
@@ -22,13 +30,15 @@ func main() {
 	}
 	defer hid.Exit()
 
-	fmt.Printf("Searching for Litra Beam LX (0x%04x:0x%04x)...\n", VID, PID)
+	fmt.Println("Searching for Litra devices...")
 	var devices []*hid.DeviceInfo
-	hid.Enumerate(VID, PID, func(info *hid.DeviceInfo) error {
-		devices = append(devices, info)
-		fmt.Printf("[%d] Path: %s\n", len(devices)-1, info.Path)
-		fmt.Printf("    Interface: %d | UsagePage: 0x%04x | Usage: 0x%04x\n", info.InterfaceNbr, info.UsagePage, info.Usage)
-		fmt.Printf("    Product: %s\n", info.ProductStr)
+	hid.Enumerate(VID, 0, func(info *hid.DeviceInfo) error {
+		if _, ok := litraPIDs[info.ProductID]; ok {
+			devices = append(devices, info)
+			fmt.Printf("[%d] Path: %s\n", len(devices)-1, info.Path)
+			fmt.Printf("    Model: %s (PID: 0x%04x) | Interface: %d | UsagePage: 0x%04x | Usage: 0x%04x\n", litraPIDs[info.ProductID], info.ProductID, info.InterfaceNbr, info.UsagePage, info.Usage)
+			fmt.Printf("    Product: %s\n", info.ProductStr)
+		}
 		return nil
 	})
 

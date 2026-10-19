@@ -1,4 +1,4 @@
-module github.com/michaelabon/streamdeck-logitech-litra
+module github.com/stewjoel/streamdeck-logitech-litra-lights
 
 go 1.24.6
 
