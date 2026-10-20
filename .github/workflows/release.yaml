@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go/go.mod"
+          cache-dependency-path: "go/go.sum"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install build tools
+        run: |
+          brew install just mingw-w64
+
+      - name: Build universal binaries (Windows & macOS)
+        run: |
+          just build
+
+      - name: Package Stream Deck plugin
+        run: |
+          mkdir -p build
+          npx streamdeck pack -o build/ com.stewjoel.logitech-litra-lights.sdPlugin
+
+      - name: Create GitHub Release and Upload Artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/*.streamDeckPlugin
+          generate_release_notes: true

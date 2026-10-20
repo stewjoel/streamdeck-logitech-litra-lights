@@ -1,11 +1,96 @@
 <svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="256" height="256" rx="40" fill="#121212"/>
   <defs>
-    <linearGradient id="mainGlow" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#FF0000;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#00FF00;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#000AFF;stop-opacity:1" />
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#1A1A24"/>
+      <stop offset="100%" stop-color="#0A0A0E"/>
+    </radialGradient>
+
+    <!-- Front White Glow Gradient (Warm 2700K to Cool 6500K) -->
+    <linearGradient id="frontLightGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFA845"/>
+      <stop offset="35%" stop-color="#FFF0DF"/>
+      <stop offset="70%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#9AD2FF"/>
     </linearGradient>
+
+    <!-- Back RGB Multi-Zone Aurora Gradient -->
+    <linearGradient id="backRgbGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF0077"/>
+      <stop offset="30%" stop-color="#9E00FF"/>
+      <stop offset="70%" stop-color="#0066FF"/>
+      <stop offset="100%" stop-color="#00F5FF"/>
+    </linearGradient>
+
+    <!-- Stand & Chassis Metal Gradient -->
+    <linearGradient id="metalChassis" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3A3A46"/>
+      <stop offset="50%" stop-color="#22222A"/>
+      <stop offset="100%" stop-color="#141418"/>
+    </linearGradient>
+
+    <linearGradient id="standMetal" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#282832"/>
+      <stop offset="50%" stop-color="#40404E"/>
+      <stop offset="100%" stop-color="#1E1E24"/>
+    </linearGradient>
+
+    <!-- Soft Glow Filter -->
+    <filter id="auraGlow" x="-20%" y="-40%" width="140%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="rgbBloom" x="-20%" y="-50%" width="140%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
   </defs>
-  <rect x="40" y="115" width="176" height="26" rx="13" fill="url(#mainGlow)"/>
+
+  <!-- Background Base -->
+  <rect width="256" height="256" rx="54" fill="url(#bgGrad)"/>
+  <rect width="256" height="256" rx="54" stroke="#2D2D3A" stroke-width="2"/>
+
+  <!-- Desktop Stand Base & Vertical Stem -->
+  <g id="stand">
+    <!-- Weighted Desktop Base -->
+    <ellipse cx="128" cy="202" rx="46" ry="12" fill="#0E0E12"/>
+    <ellipse cx="128" cy="199" rx="44" ry="10" fill="url(#metalChassis)" stroke="#383846" stroke-width="1.5"/>
+    <ellipse cx="128" cy="198" rx="20" ry="5" fill="#181820"/>
+
+    <!-- Vertical Stem/Pillar -->
+    <rect x="124" y="105" width="8" height="94" rx="4" fill="url(#standMetal)"/>
+    <rect x="126" y="105" width="4" height="94" fill="#505062" opacity="0.4"/>
+
+    <!-- Pivot Ball Joint / Mount -->
+    <rect x="121" y="98" width="14" height="15" rx="5" fill="#2E2E38" stroke="#484858" stroke-width="1"/>
+    <circle cx="128" cy="105" r="3.5" fill="#141418"/>
+  </g>
+
+  <!-- Ambient RGB Bloom (Back Light Radiance) -->
+  <rect x="22" y="70" width="212" height="18" rx="9" fill="url(#backRgbGlow)" opacity="0.4" filter="url(#rgbBloom)"/>
+
+  <!-- Litra Beam LX Dual-Light Bar Chassis -->
+  <g id="lightBar">
+    <!-- Main Aluminum Housing -->
+    <rect x="24" y="80" width="208" height="30" rx="15" fill="url(#metalChassis)" stroke="#4A4A5A" stroke-width="1.5"/>
+
+    <!-- Back RGB Light Strip (Upper Edge Accent of LX) -->
+    <rect x="34" y="83" width="188" height="6" rx="3" fill="url(#backRgbGlow)"/>
+
+    <!-- Center Aluminum Bezel Divider -->
+    <line x1="32" y1="92" x2="224" y2="92" stroke="#101014" stroke-width="2"/>
+
+    <!-- Front Studio Key Light (Main Bi-Color Bar) -->
+    <rect x="32" y="95" width="192" height="11" rx="5.5" fill="url(#frontLightGlow)" filter="url(#auraGlow)"/>
+
+    <!-- Frosted Glass Surface Highlight -->
+    <rect x="36" y="96" width="184" height="2.5" rx="1.2" fill="#FFFFFF" opacity="0.65"/>
+  </g>
+
+  <!-- LX Monogram / Subtitle Badge -->
+  <g id="badge" transform="translate(128, 52)">
+    <rect x="-30" y="-13" width="60" height="20" rx="10" fill="#161620" stroke="#363648" stroke-width="1.5"/>
+    <text x="0" y="2" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#00E5FF" text-anchor="middle" letter-spacing="1.5">LITRA LX</text>
+  </g>
 </svg>

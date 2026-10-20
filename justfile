@@ -51,6 +51,7 @@ build: setup-hidapi
     $env:CGO_ENABLED="1"; $env:GOOS="windows"; $env:GOARCH="amd64"; $env:CC="gcc"; $env:CGO_LDFLAGS="-static-libgcc -L{{ justfile_directory() }}/{{ HIDAPI_DIR }}/windows -lhidapi"; {{ GO }} build -C go {{ GOFLAGS }} -ldflags "-s -w" -o ../{{ PLUGIN }}/{{ TARGET }}.exe .
     Copy-Item "{{ HIDAPI_DIR }}/windows/hidapi.dll" "{{ PLUGIN }}/hidapi.dll" -Force
     Copy-Item "{{ HIDAPI_DIR }}/windows/hidapi.dll" "{{ PLUGIN }}/build/hidapi.dll" -Force
+    node scripts/build_all_icons.js
 
 # WSL support
 [linux]
@@ -190,8 +191,10 @@ validate:
 
 ## Package the plugin for distribution to Elgato
 package: build
-    mkdir -p build
-    npx streamdeck pack -o build/ {{ PLUGIN }}
+    if (!(Test-Path "build")) { New-Item -ItemType Directory -Force -Path "build" }
+    if (!(Test-Path "{{ PLUGIN }}/build/streamdeck-logitech-litra-lights_arm64")) { New-Item -ItemType File -Force -Path "{{ PLUGIN }}/build/streamdeck-logitech-litra-lights_arm64" }
+    npx streamdeck pack --force -o build/ {{ PLUGIN }}
+
 
 
 ## LOGS

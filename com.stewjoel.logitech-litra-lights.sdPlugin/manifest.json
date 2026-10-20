@@ -61,11 +61,11 @@
 			"UUID": "com.stewjoel.logitech-litra-lights.back.power"
 		},
 		{
-			"Icon": "icons/litra_front",
+			"Icon": "icons/litra_front_temp",
 			"Name": "Front Temp Cycle",
 			"States": [
 				{
-					"Image": "icons/litra_front",
+					"Image": "icons/litra_front_temp",
 					"TitleAlignment": "middle",
 					"Title": "Temp",
 					"FontSize": 18
@@ -157,7 +157,7 @@
 	"CodePathMac": "build/streamdeck-logitech-litra-lights_arm64",
 	"CodePath": "build/streamdeck-logitech-litra-lights.exe",
 	"Description": "Control and synchronize your Logitech Litra Glow, Litra Beam, and Litra Beam LX lights directly from the Stream Deck.",
-	"Icon": "icons/litra_back",
+	"Icon": "icons/pluginIcon",
 	"Name": "Logitech Litra",
 	"OS": [
 		{

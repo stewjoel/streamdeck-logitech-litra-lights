@@ -1,0 +1,30 @@
+<svg width="144" height="144" viewBox="0 0 144 144" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="144" height="144" fill="#121212"/>
+  <defs>
+    <linearGradient id="frontGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFA845"/>
+      <stop offset="50%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#9AD2FF"/>
+    </linearGradient>
+    <filter id="premiumGlow" x="-20%" y="-100%" width="140%" height="300%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Light Bar -->
+  <rect x="20" y="85" width="104" height="16" rx="8" fill="url(#frontGlow)" filter="url(#premiumGlow)"/>
+  <!-- Thermometer / Kelvin Temperature Symbol Above -->
+  <g transform="translate(0, -6)" stroke="white" stroke-linecap="round">
+    <!-- Thermometer Body -->
+    <path d="M68 28 C68 25.8 69.8 24 72 24 C74.2 24 76 25.8 76 28 V47 C79.2 49 81 52.5 81 56 C81 61 77 65 72 65 C67 65 63 61 63 56 C63 52.5 64.8 49 68 47 Z" stroke-width="2.5" fill="none"/>
+    <circle cx="72" cy="56" r="4.5" fill="#FFA845"/>
+    <line x1="72" y1="36" x2="72" y2="52" stroke="#FFA845" stroke-width="3"/>
+    <!-- Tick Marks -->
+    <line x1="79" y1="32" x2="83" y2="32" stroke-width="2"/>
+    <line x1="79" y1="38" x2="83" y2="38" stroke-width="2"/>
+    <line x1="79" y1="44" x2="83" y2="44" stroke-width="2"/>
+  </g>
+</svg>
